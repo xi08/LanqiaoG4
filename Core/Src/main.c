@@ -32,10 +32,10 @@
 
 typedef enum
 {
-    S0, // Empty
-    S1, // Short
-    S2, // Pressed
-    S3, // Long
+    S0, /* Empty/Initial */
+    S1, /* Short */
+    S2, /* Pressed */
+    S3, /* Long */
 } keyState_enum;
 
 /* USER CODE END PTD */
@@ -52,16 +52,25 @@ typedef enum
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+
 volatile uint32_t sysTime = 0;
-uint32_t keyPressTimestamp[keyNum];
+
+uint32_t keyTimestamp_U[keyNum];
 keyState_enum keyState[keyNum];
+
+uint8_t ledBuffer = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
+
 void keyUpdate(void);
-void keyProg(void);
+void keyResp(void);
+
+void ledUpdate(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -86,10 +95,7 @@ int main(void)
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
 
     /* System interrupt init*/
-    NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
-
-    /* SysTick_IRQn interrupt configuration */
-    NVIC_SetPriority(SysTick_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
+    NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_2);
 
     /** Disable the internal Pull-Up in Dead Battery pins of UCPD peripheral
      */
@@ -103,7 +109,7 @@ int main(void)
     SystemClock_Config();
 
     /* USER CODE BEGIN SysInit */
-
+    LL_SYSTICK_EnableIT();
     /* USER CODE END SysInit */
 
     /* Initialize all configured peripherals */
@@ -112,12 +118,17 @@ int main(void)
     MX_USART1_UART_Init();
     /* USER CODE BEGIN 2 */
 
+    ledBuffer = 0b1;
+    ledUpdate();
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     while (1)
     {
+        keyUpdate();
+        keyResp();
+        ledUpdate();
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
@@ -184,40 +195,125 @@ void keyUpdate(void)
 
     while (i--)
     {
-        // Pressed
-        if (keyInfo & (1 << i))
+        /* Pressed */
+        if ((keyInfo & (1 << i)) == 1)
         {
             switch (keyState[i])
             {
             case S0:
-                keyState[i] = S2;               // state switch
-                keyPressTimestamp[i] = sysTime; // update timestamp
+                keyState[i] = S2;            // switch state
+                keyTimestamp_U[i] = sysTime; // update timestamp
                 break;
 
             default:
                 break;
             }
         }
-        // Not Pressed
-        if (!(keyInfo & (1 << i)))
+        /* Not Pressed */
+        if ((keyInfo & (1 << i)) == 0)
         {
             switch (keyState[i])
             {
             case S2:
-                if (sysTime - keyPressTimestamp[i] >= keyLongPressTime) // S3 detection
+                if (sysTime - keyTimestamp_U[i] >= keyLongPressTime) // S3 detection
                     keyState[i] = S3;
-                else if (sysTime - keyPressTimestamp[i] >= keyShortPressTime) // S1 detection
+                else if (sysTime - keyTimestamp_U[i] >= keyShortPressTime) // S1 detection
                     keyState[i] = S1;
                 else
-                    keyState[i] = S0; // clear S2 state
+                    keyState[i] = S0; // reset state
                 break;
 
             default:
-                keyState[i] = S0; // clear S2 state
+                keyState[i] = S0; // reset state
                 break;
             }
         }
     }
+}
+
+void keyResp(void)
+{
+    /* B1 */
+    switch (keyState[0])
+    {
+    case S1: // Short
+
+        ledBuffer <<= 1;
+        if (ledBuffer == 0)
+            ledBuffer = 1;
+
+        keyState[0] = S0; // reset state
+        break;
+
+    case S3: // Long
+
+        keyState[0] = S0; // reset state
+        break;
+
+    default:
+        break;
+    }
+
+    /* B2 */
+    switch (keyState[1])
+    {
+    case S1: // Short
+        ledBuffer >>= 1;
+        if (ledBuffer == 0)
+            ledBuffer = 1;
+
+        keyState[1] = S0; // reset state
+        break;
+
+    case S3: // Long
+
+        keyState[1] = S0; // reset state
+        break;
+
+    default:
+        break;
+    }
+
+    /* B3 */
+    switch (keyState[2])
+    {
+    case S1: // Short
+
+        keyState[2] = S0; // reset state
+        break;
+
+    case S3: // Long
+
+        keyState[2] = S0; // reset state
+        break;
+
+    default:
+        break;
+    }
+
+    /* B4 */
+    switch (keyState[3])
+    {
+    case S1: // Short
+
+        keyState[3] = S0; // reset state
+        break;
+
+    case S3: // Long
+
+        keyState[3] = S0; // reset state
+        break;
+
+    default:
+        break;
+    }
+}
+
+void ledUpdate(void)
+{
+    LL_GPIO_WriteOutputPort(LD1_GPIO_Port, ~ledBuffer << 8);
+    LL_GPIO_SetOutputPin(LE_GPIO_Port, LE_Pin);
+    LL_GPIO_ResetOutputPin(LE_GPIO_Port, LE_Pin);
 }
 
 /* USER CODE END 4 */
