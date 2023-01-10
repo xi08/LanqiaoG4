@@ -57,7 +57,7 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-extern volatile uint32_t sys_time_ms;
+extern volatile uint32_t sysTime;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -123,6 +123,10 @@ void Error_Handler(void);
 #endif
 
 /* USER CODE BEGIN Private defines */
+
+#define keyNum 4 /* number of keys */
+#define keyLongPressTime 800 /* time of long press in ms */
+#define keyShortPressTime 50 /* time of short press in ms */
 
 /* USER CODE END Private defines */
 
