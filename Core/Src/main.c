@@ -44,7 +44,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+volatile uint32_t sys_time_ms=0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

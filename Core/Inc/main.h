@@ -57,7 +57,7 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
+extern volatile uint32_t sys_time_ms;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
