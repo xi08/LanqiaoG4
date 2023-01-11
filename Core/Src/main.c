@@ -25,6 +25,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <string.h>
+#include <math.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,10 +62,9 @@ keyState_enum keyState[keyNum];
 
 uint8_t ledBuffer = 0;
 
-char uartRxBuffer[128];
+char uartRxBuffer[uartBufferSize];
 uint8_t uartRxBufferIdx = 0;
 uint8_t uartRxOKFlag = 0;
-
 
 /* USER CODE END PV */
 
@@ -351,8 +352,6 @@ int fputc(int ch, FILE *f)
     LL_USART_TransmitData8(USART1, (uint8_t)ch);
     return ch;
 }
-
-
 
 /* USER CODE END 4 */
 
