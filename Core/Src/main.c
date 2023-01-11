@@ -55,7 +55,7 @@ typedef enum
 
 volatile uint32_t sysTime = 0;
 
-uint32_t keyTimestamp_U[keyNum];
+uint32_t keyUpdate_TS[keyNum];
 keyState_enum keyState[keyNum];
 
 uint8_t ledBuffer = 0;
@@ -68,8 +68,8 @@ void SystemClock_Config(void);
 
 void keyUpdate(void);
 void keyResp(void);
-
 void ledUpdate(void);
+void msDelay(uint32_t t);
 
 /* USER CODE END PFP */
 
@@ -184,6 +184,15 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+void msDelay(uint32_t t)
+{
+    uint32_t msDelay_TS = sysTime, delayT = t;
+    if (delayT < 0xffffffff)
+        delayT++;
+    while (sysTime - msDelay_TS < delayT) /* wait */
+        ;
+}
+
 void keyUpdate(void)
 {
     uint8_t i = keyNum, keyInfo = 0xff;
@@ -202,7 +211,7 @@ void keyUpdate(void)
             {
             case S0:
                 keyState[i] = S2;            // switch state
-                keyTimestamp_U[i] = sysTime; // update timestamp
+                keyUpdate_TS[i] = sysTime; // update timestamp
                 break;
 
             default:
@@ -215,9 +224,9 @@ void keyUpdate(void)
             switch (keyState[i])
             {
             case S2:
-                if (sysTime - keyTimestamp_U[i] >= keyLongPressTime) // S3 detection
+                if (sysTime - keyUpdate_TS[i] >= keyLongPressTime) // S3 detection
                     keyState[i] = S3;
-                else if (sysTime - keyTimestamp_U[i] >= keyShortPressTime) // S1 detection
+                else if (sysTime - keyUpdate_TS[i] >= keyShortPressTime) // S1 detection
                     keyState[i] = S1;
                 else
                     keyState[i] = S0; // reset state
