@@ -69,7 +69,7 @@ extern volatile uint32_t sysTime;
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void uart_ReceiveIRQ(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

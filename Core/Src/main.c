@@ -24,7 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,6 +59,11 @@ uint32_t keyUpdate_TS[keyNum];
 keyState_enum keyState[keyNum];
 
 uint8_t ledBuffer = 0;
+
+char uartRxBuffer[128];
+uint8_t uartRxBufferIdx = 0;
+uint8_t uartRxOKFlag = 0;
+
 
 /* USER CODE END PV */
 
@@ -129,6 +134,7 @@ int main(void)
         keyUpdate();
         keyResp();
         ledUpdate();
+
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
@@ -210,7 +216,7 @@ void keyUpdate(void)
             switch (keyState[i])
             {
             case S0:
-                keyState[i] = S2;            // switch state
+                keyState[i] = S2;          // switch state
                 keyUpdate_TS[i] = sysTime; // update timestamp
                 break;
 
@@ -324,6 +330,29 @@ void ledUpdate(void)
     LL_GPIO_SetOutputPin(LE_GPIO_Port, LE_Pin);
     LL_GPIO_ResetOutputPin(LE_GPIO_Port, LE_Pin);
 }
+
+void uart_ReceiveIRQ(void)
+{
+    uint8_t ch = LL_USART_ReceiveData8(USART1);
+
+    if (ch == (uint8_t)('\r'))
+    {
+        uartRxBufferIdx = 0;
+        uartRxOKFlag = 1;
+    }
+    else
+        uartRxBuffer[uartRxBufferIdx++] = ch;
+}
+
+int fputc(int ch, FILE *f)
+{
+    while (!LL_USART_IsActiveFlag_TXE(USART1))
+        ;
+    LL_USART_TransmitData8(USART1, (uint8_t)ch);
+    return ch;
+}
+
+
 
 /* USER CODE END 4 */
 
