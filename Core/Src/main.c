@@ -26,7 +26,6 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -126,6 +125,7 @@ int main(void)
 
     ledBuffer = 0b1;
     ledUpdate();
+
     /* USER CODE END 2 */
 
     /* Infinite loop */
