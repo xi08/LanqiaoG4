@@ -54,11 +54,21 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 
+typedef enum 
+{
+    S0, /* Empty/Initial */
+    S1, /* Short */
+    S2, /* Pressed */
+    S3, /* Long */
+} keyState_enum;
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
+
 extern volatile uint32_t sysTime;
+
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -72,6 +82,8 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 void uart_ReceiveIRQ(void);
 void msDelay(uint32_t t);
+void usDelay(uint32_t t);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

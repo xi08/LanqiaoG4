@@ -31,18 +31,11 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-typedef enum
-{
-    S0, /* Empty/Initial */
-    S1, /* Short */
-    S2, /* Pressed */
-    S3, /* Long */
-} keyState_enum;
-
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -55,9 +48,7 @@ typedef enum
 /* USER CODE BEGIN PV */
 
 volatile uint32_t sysTime = 0;
-
-uint32_t keyUpdate_TS[keyNum];
-keyState_enum keyState[keyNum];
+extern keyState_enum keyState[keyNum];
 
 uint8_t ledBuffer = 0;
 
@@ -70,11 +61,9 @@ uint8_t uartRxOKFlag = 0;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
 void keyUpdate(void);
 void keyResp(void);
-void ledUpdate(void);
-void msDelay(uint32_t t);
+void ledUpdate(uint8_t _led);
 
 /* USER CODE END PFP */
 
@@ -124,7 +113,7 @@ int main(void)
     /* USER CODE BEGIN 2 */
 
     ledBuffer = 0b1;
-    ledUpdate();
+    ledUpdate(ledBuffer);
 
     /* USER CODE END 2 */
 
@@ -134,7 +123,7 @@ int main(void)
     {
         keyUpdate();
         keyResp();
-        ledUpdate();
+        ledUpdate(ledBuffer);
 
         /* USER CODE END WHILE */
 
@@ -198,53 +187,6 @@ void msDelay(uint32_t t)
         delayT++;
     while (sysTime - msDelay_TS < delayT) /* wait */
         ;
-}
-
-void keyUpdate(void)
-{
-    uint8_t i = keyNum, keyInfo = 0xff;
-
-    keyInfo ^= ((LL_GPIO_IsInputPinSet(B1_GPIO_Port, B1_Pin)) << 0);
-    keyInfo ^= ((LL_GPIO_IsInputPinSet(B2_GPIO_Port, B2_Pin)) << 1);
-    keyInfo ^= ((LL_GPIO_IsInputPinSet(B3_GPIO_Port, B3_Pin)) << 2);
-    keyInfo ^= ((LL_GPIO_IsInputPinSet(B4_GPIO_Port, B4_Pin)) << 3);
-
-    while (i--)
-    {
-        /* Pressed */
-        if ((keyInfo & (1 << i)) == 1)
-        {
-            switch (keyState[i])
-            {
-            case S0:
-                keyState[i] = S2;          // switch state
-                keyUpdate_TS[i] = sysTime; // update timestamp
-                break;
-
-            default:
-                break;
-            }
-        }
-        /* Not Pressed */
-        if ((keyInfo & (1 << i)) == 0)
-        {
-            switch (keyState[i])
-            {
-            case S2:
-                if (sysTime - keyUpdate_TS[i] >= keyLongPressTime) // S3 detection
-                    keyState[i] = S3;
-                else if (sysTime - keyUpdate_TS[i] >= keyShortPressTime) // S1 detection
-                    keyState[i] = S1;
-                else
-                    keyState[i] = S0; // reset state
-                break;
-
-            default:
-                keyState[i] = S0; // reset state
-                break;
-            }
-        }
-    }
 }
 
 void keyResp(void)
@@ -325,13 +267,6 @@ void keyResp(void)
     }
 }
 
-void ledUpdate(void)
-{
-    LL_GPIO_WriteOutputPort(LD1_GPIO_Port, ~ledBuffer << 8);
-    LL_GPIO_SetOutputPin(LE_GPIO_Port, LE_Pin);
-    LL_GPIO_ResetOutputPin(LE_GPIO_Port, LE_Pin);
-}
-
 void uart_ReceiveIRQ(void)
 {
     uint8_t ch = LL_USART_ReceiveData8(USART1);
@@ -343,14 +278,6 @@ void uart_ReceiveIRQ(void)
     }
     else
         uartRxBuffer[uartRxBufferIdx++] = ch;
-}
-
-int fputc(int ch, FILE *f)
-{
-    while (!LL_USART_IsActiveFlag_TXE(USART1))
-        ;
-    LL_USART_TransmitData8(USART1, (uint8_t)ch);
-    return ch;
 }
 
 /* USER CODE END 4 */

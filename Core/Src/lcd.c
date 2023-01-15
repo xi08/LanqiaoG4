@@ -1,819 +1,568 @@
-/*
-  程序说明: CT117E嵌入式竞赛板LCD驱动程序
-  软件环境: Keil uVision 4.10 
-  硬件环境: CT117E嵌入式竞赛板
-  日    期: 2011-8-9
-*/
+
 #include "lcd.h"
-#include "fonts.h"
-//#include "systick.h"
-static  vu16 TextColor = 0x0000, BackColor = 0xFFFF;
-vu16 dummy;
+#include "font.h"
 
-/*******************************************************************************
-* Function Name  : Delay_LCD
-* Description    : Inserts a delay time.
-* Input          : nCount: specifies the delay time length.
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void Delay_LCD(u16 n)
+volatile static lcdColor_t LCD_FrontColor = 0x0000, LCD_BackColor = 0xffff;
+volatile uint16_t LCD_Type;
+
+#define nop_3() (__nop(), __nop(), __nop())
+
+void LCD_delay(uint16_t t)
 {
-	u16 i,j;
-	for (i = 0;i<n;++i)
-		for(j=0;j<3000;++j);
 }
 
-/*
-	uC8230型液晶控制器寄存器配置
-*/
-void REG_8230_Init(void)
-{
-	LCD_WriteReg(0x0000,0x0001);
-	Delay_LCD(1000); 
-	LCD_WriteReg(0x0001,0x0000);
-	LCD_WriteReg(0x0010,0x1790);
-	LCD_WriteReg(0x0060,0x2700);
-	LCD_WriteReg(0x0061,0x0001);
-	LCD_WriteReg(0x0046,0x0002);
-	LCD_WriteReg(0x0013,0x8010);
-	LCD_WriteReg(0x0012,0x80fe);
-	LCD_WriteReg(0x0002,0x0500);
-	LCD_WriteReg(0x0003,0x1030);
-	
-	LCD_WriteReg(0x0030,0x0303);
-	LCD_WriteReg(0x0031,0x0303);
-	LCD_WriteReg(0x0032,0x0303);
-	LCD_WriteReg(0x0033,0x0300);
-	LCD_WriteReg(0x0034,0x0003);
-	LCD_WriteReg(0x0035,0x0303);
-	LCD_WriteReg(0x0036,0x0014);
-	LCD_WriteReg(0x0037,0x0303);
-	LCD_WriteReg(0x0038,0x0303);
-	LCD_WriteReg(0x0039,0x0303);
-	LCD_WriteReg(0x003a,0x0300);
-	LCD_WriteReg(0x003b,0x0003);
-	LCD_WriteReg(0x003c,0x0303);
-	LCD_WriteReg(0x003d,0x1400);
-	  
-	LCD_WriteReg(0x0092,0x0200);
-	LCD_WriteReg(0x0093,0x0303);
-	LCD_WriteReg(0x0090,0x080d); 
-	LCD_WriteReg(0x0003,0x1018); 
-	LCD_WriteReg(0x0007,0x0173);
-}
+/* legacy support */
 
-void REG_932X_Init(void)
-{
-	LCD_WriteReg(R227, 0x3008);   // Set internal timing
-	LCD_WriteReg(R231, 0x0012); // Set internal timing
-	LCD_WriteReg(R239, 0x1231);   // Set internal timing
-	LCD_WriteReg(R1  , 0x0000); // set SS and SM bit		  //0x0100
-	LCD_WriteReg(R2  , 0x0700); // set 1 line inversion
-	LCD_WriteReg(R3  , 0x1030);   // set GRAM write direction and BGR=1.
-	LCD_WriteReg(R4  , 0x0000);   // Resize register
-	LCD_WriteReg(R8  , 0x0207);   // set the back porch and front porch
-	LCD_WriteReg(R9  , 0x0000);   // set non-display area refresh cycle ISC[3:0]
-	LCD_WriteReg(R10 , 0x0000);   // FMARK function
-	LCD_WriteReg(R12 , 0x0000); // RGB interface setting
-	LCD_WriteReg(R13 , 0x0000);   // Frame marker Position
-	LCD_WriteReg(R15 , 0x0000); // RGB interface polarity
-	/**************Power On sequence ****************/
-	LCD_WriteReg(R16 , 0x0000);   // SAP, BT[3:0], AP, DSTB, SLP, STB
-	LCD_WriteReg(R17 , 0x0007);   // DC1[2:0], DC0[2:0], VC[2:0]
-	LCD_WriteReg(R18 , 0x0000); // VREG1OUT voltage
-	LCD_WriteReg(R19 , 0x0000);   // VDV[4:0] for VCOM amplitude
-//	Delay_Ms(200);                    // Delay 200 MS , Dis-charge capacitor power voltage
-	LL_mDelay(200);
-	LCD_WriteReg(R16 , 0x1690);   // SAP, BT[3:0], AP, DSTB, SLP, STB
-	LCD_WriteReg(R17 , 0x0227); // R11H=0x0221 at VCI=3.3V, DC1[2:0], DC0[2:0], VC[2:0]
-//	Delay_Ms(50);      // Delay 50ms
-	LL_mDelay(50);
-	LCD_WriteReg(R18 , 0x001D); // External reference voltage= Vci;
-//	Delay_Ms(50);      // Delay 50ms
-	LL_mDelay(50);
-	LCD_WriteReg(R19 , 0x0800); // R13H=1D00 when R12H=009D;VDV[4:0] for VCOM amplitude
-	LCD_WriteReg(R41 , 0x0014); // R29H=0013 when R12H=009D;VCM[5:0] for VCOMH
-	LCD_WriteReg(R43 , 0x000B);   // Frame Rate = 96Hz
-//	Delay_Ms(50);      // Delay 50ms
-	LL_mDelay(50);
-	LCD_WriteReg(R32 , 0x0000); // GRAM horizontal Address
-	LCD_WriteReg(R33 , 0x0000); // GRAM Vertical Address
-	/* ----------- Adjust the Gamma Curve ---------- */
-	LCD_WriteReg(R48 , 0x0007);
-	LCD_WriteReg(R49 , 0x0707);
-	LCD_WriteReg(R50 , 0x0006);
-	LCD_WriteReg(R53 , 0x0704);
-	LCD_WriteReg(R54 , 0x1F04);
-	LCD_WriteReg(R55 , 0x0004);
-	LCD_WriteReg(R56 , 0x0000);
-	LCD_WriteReg(R57 , 0x0706);
-	LCD_WriteReg(R60 , 0x0701);
-	LCD_WriteReg(R61 , 0x000F);
-	/* ------------------ Set GRAM area --------------- */
-	LCD_WriteReg(R80 , 0x0000);   // Horizontal GRAM Start Address
-	LCD_WriteReg(R81 , 0x00EF);   // Horizontal GRAM End Address
-	LCD_WriteReg(R82 , 0x0000); // Vertical GRAM Start Address
-	LCD_WriteReg(R83 , 0x013F); // Vertical GRAM Start Address
-	LCD_WriteReg(R96 , 0x2700); // Gate Scan Line		  0xA700
-	LCD_WriteReg(R97 , 0x0001); // NDL,VLE, REV
-	LCD_WriteReg(R106, 0x0000); // set scrolling line
-	/* -------------- Partial Display Control --------- */
-	LCD_WriteReg(R128, 0x0000);   
-	LCD_WriteReg(R129, 0x0000);
-	LCD_WriteReg(R130, 0x0000);
-	LCD_WriteReg(R131, 0x0000);
-	LCD_WriteReg(R132, 0x0000);
-	LCD_WriteReg(R133, 0x0000);
-	/* -------------- Panel Control ------------------- */
-	LCD_WriteReg(R144, 0x0010);
-	LCD_WriteReg(R146, 0x0000);
-	LCD_WriteReg(R147, 0x0003);
-	LCD_WriteReg(R149, 0x0110);
-	LCD_WriteReg(R151, 0x0000);
-	LCD_WriteReg(R152, 0x0000);
-	   /* Set GRAM write direction and BGR = 1 */
-	   /* I/D=01 (Horizontal : increment, Vertical : decrement) */
-	   /* AM=1 (address is updated in vertical writing direction) */
-	LCD_WriteReg(R3  , 0x01018);  //0x1018
-	
-	LCD_WriteReg(R7  , 0x0173); // 262K color and display ON
-}
-/*******************************************************************************
-* Function Name  : STM3210B_LCD_Init
-* Description    : Initializes the LCD.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_Init(void)
-{ 
-	LCD_CtrlLinesConfig();
-	dummy = LCD_ReadReg(0);	
-	
-	if(dummy == 0x8230){
-		REG_8230_Init();
-	}
-	else{
-		REG_932X_Init();	
-	}
-	dummy = LCD_ReadReg(0);	
-
-}
-/*******************************************************************************
-* Function Name  : LCD_SetTextColor
-* Description    : Sets the Text color.
-* Input          : - Color: specifies the Text color code RGB(5-6-5).
-* Output         : - TextColor: Text color global variable used by LCD_DrawChar
-*                  and LCD_DrawPicture functions.
-* Return         : None
-*******************************************************************************/
-void LCD_SetTextColor(vu16 Color)
-{
-	TextColor = Color;
-}
-/*******************************************************************************
-* Function Name  : LCD_SetBackColor
-* Description    : Sets the Background color.
-* Input          : - Color: specifies the Background color code RGB(5-6-5).
-* Output         : - BackColor: Background color global variable used by 
-*                  LCD_DrawChar and LCD_DrawPicture functions.
-* Return         : None
-*******************************************************************************/
-void LCD_SetBackColor(vu16 Color)
-{
-	BackColor = Color;
-}
-/*******************************************************************************
-* Function Name  : LCD_ClearLine
-* Description    : Clears the selected line.
-* Input          : - Line: the Line to be cleared.
-*                    This parameter can be one of the following values:
-*                       - Linex: where x can be 0..9
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_ClearLine(u8 Line)
-{
-	LCD_DisplayStringLine(Line, "                    ");
-}
-/*******************************************************************************
-* Function Name  : LCD_Clear
-* Description    : Clears the hole LCD.
-* Input          : Color: the color of the background.
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_Clear(u16 Color)
-{
-	u32 index = 0;
-	LCD_SetCursor(0x00, 0x0000); 
-	LCD_WriteRAM_Prepare(); /* Prepare to write GRAM */
-	for(index = 0; index < 76800; index++)
-	{
-		LCD_WriteRAM(Color);    
-	}
-}
-/*******************************************************************************
-* Function Name  : LCD_SetCursor
-* Description    : Sets the cursor position.
-* Input          : - Xpos: specifies the X position.
-*                  - Ypos: specifies the Y position. 
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_SetCursor(u8 Xpos, u16 Ypos)
-{ 
-	LCD_WriteReg(R32, Xpos);
-	LCD_WriteReg(R33, Ypos);
-}
-/*******************************************************************************
-* Function Name  : LCD_DrawChar
-* Description    : Draws a character on LCD.
-* Input          : - Xpos: the Line where to display the character shape.
-*                    This parameter can be one of the following values:
-*                       - Linex: where x can be 0..9
-*                  - Ypos: start column address.
-*                  - c: pointer to the character data.
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_DrawChar(u8 Xpos, u16 Ypos, uc16 *c)
-{
-	u32 index = 0, i = 0;
-	u8 Xaddress = 0;
-   
-	Xaddress = Xpos;
-	LCD_SetCursor(Xaddress, Ypos);
-  
-	for(index = 0; index < 24; index++)
-	{
-		LCD_WriteRAM_Prepare(); /* Prepare to write GRAM */
-		for(i = 0; i < 16; i++)
-		{
-			if((c[index] & (1 << i)) == 0x00)
-			{
-				LCD_WriteRAM(BackColor);
-			}
-			else
-			{
-				LCD_WriteRAM(TextColor);
-			}
-		}
-		Xaddress++;
-		LCD_SetCursor(Xaddress, Ypos);
-	}
-}
-/*******************************************************************************
-* Function Name  : LCD_DisplayChar
-* Description    : Displays one character (16dots width, 24dots height).
-* Input          : - Line: the Line where to display the character shape .
-*                    This parameter can be one of the following values:
-*                       - Linex: where x can be 0..9
-*                  - Column: start column address.
-*                  - Ascii: character ascii code, must be between 0x20 and 0x7E.
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_DisplayChar(u8 Line, u16 Column, u8 Ascii)
-{
-	Ascii -= 32;
-	LCD_DrawChar(Line, Column, &ASCII_Table[Ascii * 24]);
-}
-/*******************************************************************************
-* Function Name  : LCD_DisplayStringLine
-* Description    : Displays a maximum of 20 char on the LCD.
-* Input          : - Line: the Line where to display the character shape .
-*                    This parameter can be one of the following values:
-*                       - Linex: where x can be 0..9
-*                  - *ptr: pointer to string to display on LCD.
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_DisplayStringLine(u8 Line, u8 *ptr)
-{
-	u32 i = 0;
-	u16 refcolumn = 319;//319;
-
-	while ((*ptr != 0) && (i < 20))	 //	20
-	{
-		LCD_DisplayChar(Line, refcolumn, *ptr);
-		refcolumn -= 16;
-		ptr++;
-		i++;
-	}
-}
-/*******************************************************************************
-* Function Name  : LCD_SetDisplayWindow
-* Description    : Sets a display window
-* Input          : - Xpos: specifies the X buttom left position.
-*                  - Ypos: specifies the Y buttom left position.
-*                  - Height: display window height.
-*                  - Width: display window width.
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_SetDisplayWindow(u8 Xpos, u16 Ypos, u8 Height, u16 Width)
-{
-	if(Xpos >= Height)
-	{
-		LCD_WriteReg(R80, (Xpos - Height + 1));
-	}
-	else
-	{
-		LCD_WriteReg(R80, 0);
-	}
-	LCD_WriteReg(R81, Xpos);
-	if(Ypos >= Width)
-	{
-		LCD_WriteReg(R82, (Ypos - Width + 1));
-	}  
-	else
-	{
-		LCD_WriteReg(R82, 0);
-	}
-	/* Vertical GRAM End Address */
-	LCD_WriteReg(R83, Ypos);
-	LCD_SetCursor(Xpos, Ypos);
-}
-/*******************************************************************************
-* Function Name  : LCD_WindowModeDisable
-* Description    : Disables LCD Window mode.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_WindowModeDisable(void)
-{
-	LCD_SetDisplayWindow(239, 0x13F, 240, 320);
-	LCD_WriteReg(R3, 0x1018);    
-}
-/*******************************************************************************
-* Function Name  : LCD_DrawLine
-* Description    : Displays a line.
-* Input          : - Xpos: specifies the X position.
-*                  - Ypos: specifies the Y position.
-*                  - Length: line length.
-*                  - Direction: line direction.
-*                    This parameter can be one of the following values: Vertical 
-*                    or Horizontal.
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_DrawLine(u8 Xpos, u16 Ypos, u16 Length, u8 Direction)
-{
-	u32 i = 0;
-  
-	LCD_SetCursor(Xpos, Ypos);
-	if(Direction == Horizontal)
-	{
-		LCD_WriteRAM_Prepare(); /* Prepare to write GRAM */
-		for(i = 0; i < Length; i++)
-		{
-			LCD_WriteRAM(TextColor);
-		}
-	}
-	else
-	{
-		for(i = 0; i < Length; i++)
-		{
-			LCD_WriteRAM_Prepare(); /* Prepare to write GRAM */
-			LCD_WriteRAM(TextColor);
-			Xpos++;
-			LCD_SetCursor(Xpos, Ypos);
-		}
-	}
-}
-/*******************************************************************************
-* Function Name  : LCD_DrawRect
-* Description    : Displays a rectangle.
-* Input          : - Xpos: specifies the X position.
-*                  - Ypos: specifies the Y position.
-*                  - Height: display rectangle height.
-*                  - Width: display rectangle width.
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_DrawRect(u8 Xpos, u16 Ypos, u8 Height, u16 Width)
-{
-	LCD_DrawLine(Xpos, Ypos, Width, Horizontal);
-	LCD_DrawLine((Xpos + Height), Ypos, Width, Horizontal);
-  
-	LCD_DrawLine(Xpos, Ypos, Height, Vertical);
-	LCD_DrawLine(Xpos, (Ypos - Width + 1), Height, Vertical);
-}
-/*******************************************************************************
-* Function Name  : LCD_DrawCircle
-* Description    : Displays a circle.
-* Input          : - Xpos: specifies the X position.
-*                  - Ypos: specifies the Y position.
-*                  - Height: display rectangle height.
-*                  - Width: display rectangle width.
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_DrawCircle(u8 Xpos, u16 Ypos, u16 Radius)
-{
-	s32  D;
-	u32  CurX;
-	u32  CurY;
-  
-  	D = 3 - (Radius << 1);
-  	CurX = 0;
-  	CurY = Radius;
-  
-  	while (CurX <= CurY)
-  	{
-	    LCD_SetCursor(Xpos + CurX, Ypos + CurY);
-	    LCD_WriteRAM_Prepare(); /* Prepare to write GRAM */
-	    LCD_WriteRAM(TextColor);
-	
-	    LCD_SetCursor(Xpos + CurX, Ypos - CurY);
-	    LCD_WriteRAM_Prepare(); /* Prepare to write GRAM */
-	    LCD_WriteRAM(TextColor);
-	
-	    LCD_SetCursor(Xpos - CurX, Ypos + CurY);
-	    LCD_WriteRAM_Prepare(); /* Prepare to write GRAM */
-	    LCD_WriteRAM(TextColor);
-	
-	    LCD_SetCursor(Xpos - CurX, Ypos - CurY);
-	    LCD_WriteRAM_Prepare(); /* Prepare to write GRAM */
-	    LCD_WriteRAM(TextColor);
-	
-	    LCD_SetCursor(Xpos + CurY, Ypos + CurX);
-	    LCD_WriteRAM_Prepare(); /* Prepare to write GRAM */
-	    LCD_WriteRAM(TextColor);
-	
-	    LCD_SetCursor(Xpos + CurY, Ypos - CurX);
-	    LCD_WriteRAM_Prepare(); /* Prepare to write GRAM */
-	    LCD_WriteRAM(TextColor);
-	
-	    LCD_SetCursor(Xpos - CurY, Ypos + CurX);
-	    LCD_WriteRAM_Prepare(); /* Prepare to write GRAM */
-	    LCD_WriteRAM(TextColor);
-	
-	    LCD_SetCursor(Xpos - CurY, Ypos - CurX);
-	    LCD_WriteRAM_Prepare(); /* Prepare to write GRAM */
-	    LCD_WriteRAM(TextColor);
-
-	    if (D < 0)
-	    { 
-	      D += (CurX << 2) + 6;
-	    }
-	    else
-	    {
-	      D += ((CurX - CurY) << 2) + 10;
-	      CurY--;
-	    }
-	    CurX++;
-  	}
-}
-/*******************************************************************************
-* Function Name  : LCD_DrawMonoPict
-* Description    : Displays a monocolor picture.
-* Input          : - Pict: pointer to the picture array.
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_DrawMonoPict(uc32 *Pict)
-{
-	u32 index = 0, i = 0;
-
-	LCD_SetCursor(0, 319); 
-
-	LCD_WriteRAM_Prepare(); /* Prepare to write GRAM */
-	for(index = 0; index < 2400; index++)
-	{
-		for(i = 0; i < 32; i++)
-		{
-			if((Pict[index] & (1 << i)) == 0x00)
-			{
-				LCD_WriteRAM(BackColor);
-			}
-			else
-			{
-				LCD_WriteRAM(TextColor);
-			}
-		}
-	}
-}
-/*******************************************************************************
-* Function Name  : LCD_WriteBMP
-* Description    : Displays a bitmap picture loaded in the internal Flash.
-* Input          : - BmpAddress: Bmp picture address in the internal Flash.
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_WriteBMP(u32 BmpAddress)
-{
-	u32 index = 0, size = 0;
-
-	size = *(vu16 *) (BmpAddress + 2);
-	size |= (*(vu16 *) (BmpAddress + 4)) << 16;
-
-	index = *(vu16 *) (BmpAddress + 10);
-	index |= (*(vu16 *) (BmpAddress + 12)) << 16;
-	size = (size - index)/2;
-	BmpAddress += index;
-
-	LCD_WriteReg(R3, 0x1008);
-	LCD_WriteRAM_Prepare();
-	for(index = 0; index < size; index++)
-	{
-		LCD_WriteRAM(*(vu16 *)BmpAddress);
-		BmpAddress += 2;
-	}
-	LCD_WriteReg(R3, 0x1018);
-}
-/*******************************************************************************
-* Function Name  : LCD_WriteReg
-* Description    : Writes to the selected LCD register.
-* Input          : - LCD_Reg: address of the selected register.
-*                  - LCD_RegValue: value to write to the selected register.
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_WriteReg(u8 LCD_Reg, u16 LCD_RegValue)
-{
-	GPIOB->BRR  |= LL_GPIO_PIN_9;  	
-	GPIOB->BRR  |= LL_GPIO_PIN_8;  	
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 	
-	
-	GPIOC->ODR = LCD_Reg; 
-	GPIOB->BRR  |= LL_GPIO_PIN_5; 
-	__nop();
-	__nop();
-	__nop();	
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
-	GPIOB->BSRR |= LL_GPIO_PIN_8; 
-
-	GPIOC->ODR = LCD_RegValue; 
-	GPIOB->BRR  |= LL_GPIO_PIN_5; 
-	__nop();
-	__nop();
-	__nop();  
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
-	GPIOB->BSRR |= LL_GPIO_PIN_8; 
-}
-/*******************************************************************************
-* Function Name  : LCD_ReadReg
-* Description    : Reads the selected LCD Register.
-* Input          : None
-* Output         : None
-* Return         : LCD Register Value.
-*******************************************************************************/
-u16 LCD_ReadReg(u8 LCD_Reg)
-{
-	u16 temp;
-
-	GPIOB->BRR |= LL_GPIO_PIN_9;  
-	GPIOB->BRR |= LL_GPIO_PIN_8;  
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
-
-	GPIOC->ODR = LCD_Reg; 
-	GPIOB->BRR |= LL_GPIO_PIN_5; 
-	__nop();
-	__nop();
-	__nop();
-	GPIOB->BSRR |= LL_GPIO_PIN_5;
-	GPIOB->BSRR |= LL_GPIO_PIN_8;
-
-	LCD_BusIn();
-	GPIOA->BRR |= LL_GPIO_PIN_8;	
-	__nop();
-	__nop();
-	__nop();
-	temp = GPIOC->IDR;    
-	GPIOA->BSRR |= LL_GPIO_PIN_8;
-
-	LCD_BusOut();
-	GPIOB->BSRR |= LL_GPIO_PIN_9; 
-
-	return temp;
-}
-/*******************************************************************************
-* Function Name  : LCD_WriteRAM_Prepare
-* Description    : Prepare to write to the LCD RAM.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_WriteRAM_Prepare(void)
-{ 
-	GPIOB->BRR  |= LL_GPIO_PIN_9;  
-	GPIOB->BRR  |= LL_GPIO_PIN_8; 
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
-
-	GPIOC->ODR = R34;     
-	GPIOB->BRR  |= LL_GPIO_PIN_5; 
-	__nop();
-	__nop();
-	__nop();    
-	GPIOB->BSRR |= LL_GPIO_PIN_5;
-	GPIOB->BSRR |= LL_GPIO_PIN_8; 
-	__nop();
-	__nop();
-	__nop();  
-	GPIOB->BSRR |= LL_GPIO_PIN_9; 
-}
-/*******************************************************************************
-* Function Name  : LCD_WriteRAM
-* Description    : Writes to the LCD RAM.
-* Input          : - RGB_Code: the pixel color in RGB mode (5-6-5).
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_WriteRAM(u16 RGB_Code)
-{
-	GPIOB->BRR  |= LL_GPIO_PIN_9;  
-	GPIOB->BSRR |= LL_GPIO_PIN_8; 
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
-
-	GPIOC->ODR = RGB_Code;
-	GPIOB->BRR  |= LL_GPIO_PIN_5;
-	__nop();
-	__nop();
-	__nop();  
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
-	GPIOB->BSRR |= LL_GPIO_PIN_8; 
-	__nop();
-	__nop();
-	__nop();
-	GPIOB->BSRR |= LL_GPIO_PIN_9; 
-}
-/*******************************************************************************
-* Function Name  : LCD_ReadRAM
-* Description    : Reads the LCD RAM.
-* Input          : None
-* Output         : None
-* Return         : LCD RAM Value.
-*******************************************************************************/
-u16 LCD_ReadRAM(void)
-{
-	u16 temp;
-
-	GPIOB->BRR  |= LL_GPIO_PIN_9; 
-	GPIOB->BRR  |= LL_GPIO_PIN_8; 
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
-
-	GPIOC->ODR = R34;     
-	GPIOB->BRR  |= LL_GPIO_PIN_5;  
-	__nop();
-	__nop();
-	__nop();  
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
-	GPIOB->BSRR |= LL_GPIO_PIN_8; 
-
-	LCD_BusIn();
-	GPIOA->BRR |= LL_GPIO_PIN_8;
-	__nop();
-	__nop();
-	__nop();  	
-	temp = GPIOC->IDR;  
-	GPIOA->BSRR |= LL_GPIO_PIN_8;	
-	
-	LCD_BusOut();
-	GPIOB->BSRR |= LL_GPIO_PIN_9; 
-                         
-	return temp;
-}
-/*******************************************************************************
-* Function Name  : LCD_PowerOn
-* Description    : Power on the LCD.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_PowerOn(void)
-{
-	LCD_WriteReg(R16, 0x0000);
-	LCD_WriteReg(R17, 0x0000); 
-	LCD_WriteReg(R18, 0x0000);
-	LCD_WriteReg(R19, 0x0000); 
-	Delay_LCD(20);             
-	LCD_WriteReg(R16, 0x17B0); 
-	LCD_WriteReg(R17, 0x0137);
-	Delay_LCD(5);             
-	LCD_WriteReg(R18, 0x0139); 
-	Delay_LCD(5);             
-	LCD_WriteReg(R19, 0x1d00); 
-	LCD_WriteReg(R41, 0x0013); 
-	Delay_LCD(5);             
-	LCD_WriteReg(R7, 0x0173);
-}
-/*******************************************************************************
-* Function Name  : LCD_DisplayOn
-* Description    : Enables the Display.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_DisplayOn(void)
-{
-	LCD_WriteReg(R7, 0x0173);
-}
-/*******************************************************************************
-* Function Name  : LCD_DisplayOff
-* Description    : Disables the Display.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_DisplayOff(void)
-{
-	LCD_WriteReg(R7, 0x0); 
-}
-/*******************************************************************************
-* Function Name  : LCD_CtrlLinesConfig
-* Description    : Configures LCD Control lines.
-                   Push-Pull mode.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_CtrlLinesConfig(void)
-{
-
-	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-  /* GPIO Ports Clock Enable */
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
-  LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);	
-		
-	GPIO_InitStruct.Pin = LL_GPIO_PIN_5|LL_GPIO_PIN_8|LL_GPIO_PIN_9;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  LL_GPIO_Init(GPIOB, &GPIO_InitStruct); 
-
-	GPIO_InitStruct.Pin = LL_GPIO_PIN_8;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  LL_GPIO_Init(GPIOA, &GPIO_InitStruct); 
-
-	LCD_BusOut();
-
-	GPIOA->BSRR |= 0x0100;
-	GPIOB->BSRR |= 0x0220;
-}
-
-/*******************************************************************************
-* Function Name  : LCD_BusIn
-* Description    : Configures the Parallel interface for LCD(PortC)
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/**
+ * @brief Configures the Parallel interface for LCD
+ *
+ */
 void LCD_BusIn(void)
-{	
-	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-	
-	GPIO_InitStruct.Pin = LL_GPIO_PIN_ALL;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
-  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  LL_GPIO_Init(GPIOC, &GPIO_InitStruct); 		
+{
+    LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+    GPIO_InitStruct.Pin = LL_GPIO_PIN_ALL;
+    GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
+    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+    LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 }
 
-/*******************************************************************************
-* Function Name  : LCD_BusOut
-* Description    : Configures the Parallel interface for LCD(PortC)
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/**
+ * @brief Configures the Parallel interface for LCD
+ *
+ */
 void LCD_BusOut(void)
 {
-	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-	
-	GPIO_InitStruct.Pin = LL_GPIO_PIN_ALL;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  LL_GPIO_Init(GPIOC, &GPIO_InitStruct); 	
+    LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+    GPIO_InitStruct.Pin = LL_GPIO_PIN_ALL;
+    GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+    LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 }
 
-/*******************************************************************************
-* Function Name  : LCD_DrawPicture
-* Description    : Displays a 16 color picture.
-* Input          : - picture: pointer to the picture array.
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void LCD_DrawPicture(const u8* picture)
+/* Bus Control */
+
+/**
+ * @brief Change the parallel interface to output mode
+ *
+ */
+void LCD_busModeOut(void)
 {
-	int index;
-	LCD_SetCursor(0x00, 0x0000); 
+    uint16_t pinMsk = LL_GPIO_PIN_15;
+    while (pinMsk >>= 1)
+        LL_GPIO_SetPinMode(GPIOC, pinMsk, LL_GPIO_MODE_OUTPUT);
+}
 
-	LCD_WriteRAM_Prepare(); /* Prepare to write GRAM */
+/**
+ * @brief Change the parallel interface to input mode
+ *
+ */
+void LCD_busModeIn(void)
+{
+    uint16_t pinMsk = LL_GPIO_PIN_15;
+    while (pinMsk >>= 1)
+        LL_GPIO_SetPinMode(GPIOC, pinMsk, LL_GPIO_MODE_INPUT);
+}
 
-	for(index = 0; index < 76800; index++)
-	{
-		LCD_WriteRAM(picture[2*index+1]<<8|picture[2*index]);	
-	}
+/**
+ * @brief Configures the parallel interface
+ *
+ */
+void LCD_busInit(void)
+{
+    LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
+    GPIO_InitStruct.Pin = LL_GPIO_PIN_ALL;
+    GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
+    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
+    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
+    LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+}
+
+/**
+ * @brief Reset the parallel interface to initial state
+ *
+ */
+void LCD_busReset(void)
+{
+    LL_GPIO_SetOutputPin(nCS_GPIO_Port, nCS_Pin); // nCS inactive (PB9=1)
+    LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin); // nWR inactive (PB5=1)
+    LL_GPIO_SetOutputPin(nRD_GPIO_Port, nRD_Pin); // nRD inactive (PA8=1)
+    LL_GPIO_SetOutputPin(RS_GPIO_Port, RS_Pin);   // RS reset(PB8=1, data)
+}
+
+/* Register IO */
+
+/**
+ * @brief Read the selected LCD register.
+ *
+ * @param regIdx Register Index
+ * @return uint16_t Register Value
+ */
+uint16_t LCD_getRegVal(uint8_t regIdx)
+{
+    uint16_t _dat;
+
+    /* Write index register */
+    LCD_busModeOut();                               // switch to output mode
+    LL_GPIO_ResetOutputPin(nCS_GPIO_Port, nCS_Pin); // nCS active (PB9=0)
+    LL_GPIO_ResetOutputPin(RS_GPIO_Port, RS_Pin);   // index reg active (PB8=0)
+    LL_GPIO_WriteOutputPort(GPIOC, regIdx);         // write reg
+    LL_GPIO_ResetOutputPin(nWR_GPIO_Port, nWR_Pin); // nWR active (PB5=0)
+    nop_3(), nop_3(), nop_3();                      // keep the timing (9WS@170MHz, 52ns)
+    LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);   // nWR inactive (PB5=1)
+    LL_GPIO_SetOutputPin(RS_GPIO_Port, RS_Pin);     // data reg active (PB8=1)
+
+    /* Read data register */
+    LCD_busModeIn();                                // switch to input mode
+    LL_GPIO_ResetOutputPin(nRD_GPIO_Port, nRD_Pin); // nRD active (PA8=0)
+    nop_3(), nop_3(), nop_3();                      // keep the timing (9WS@170MHz, 52ns)
+    _dat = LL_GPIO_ReadInputPort(GPIOC);            // read reg
+    LL_GPIO_SetOutputPin(nRD_GPIO_Port, nRD_Pin);   // nRD inactive (PA8=1)
+    LL_GPIO_SetOutputPin(nCS_GPIO_Port, nCS_Pin);   // nCS inactive (PB9=1)
+
+    return _dat;
+}
+
+/**
+ * @brief Write to the selected LCD register
+ *
+ * @param regIdx Register Index
+ * @param regVal Register Value
+ */
+void LCD_setRegVal(uint8_t regIdx, uint16_t regVal)
+{
+    /* Write index register */
+    LCD_busModeOut();                               // switch to output mode
+    LL_GPIO_ResetOutputPin(nCS_GPIO_Port, nCS_Pin); // nCS active (PB9=0)
+    LL_GPIO_ResetOutputPin(RS_GPIO_Port, RS_Pin);   // index reg active (PB8=0)
+    LL_GPIO_WriteOutputPort(GPIOC, regIdx);         // write reg
+    LL_GPIO_ResetOutputPin(nWR_GPIO_Port, nWR_Pin); // nWR active (PB5=0)
+    nop_3(), nop_3(), nop_3();                      // keep the timing (9WS@170MHz, 52ns)
+    LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);   // nWR inactive (PB5=1)
+    LL_GPIO_SetOutputPin(RS_GPIO_Port, RS_Pin);     // data reg active (PB8=1)
+
+    /* Write data register */
+    LL_GPIO_WriteOutputPort(GPIOC, regIdx);         // write reg
+    LL_GPIO_ResetOutputPin(nWR_GPIO_Port, nWR_Pin); // nWR active (PB5=0)
+    nop_3(), nop_3(), nop_3();                      // keep the timing (9WS@170MHz, 52ns)
+    LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);   // nWR inactive (PB5=1)
+    LL_GPIO_SetOutputPin(nCS_GPIO_Port, nCS_Pin);   // nCS inactive (PB9=1)
+}
+
+/* GRAM IO */
+
+/**
+ * @brief Prepare to read the GRAM of LCD continuously
+ *
+ */
+void LCD_startReadGRAM(void)
+{
+    /* Write index register */
+    LCD_busModeOut();                               // switch to output mode
+    LL_GPIO_ResetOutputPin(nCS_GPIO_Port, nCS_Pin); // nCS active (PB9=0)
+    LL_GPIO_ResetOutputPin(RS_GPIO_Port, RS_Pin);   // index reg active (PB8=0)
+    LL_GPIO_WriteOutputPort(GPIOC, 0x22);           // write GRAM IO flag reg
+    LL_GPIO_ResetOutputPin(nWR_GPIO_Port, nWR_Pin); // nWR active (PB5=0)
+    nop_3(), nop_3(), nop_3();                      // keep the timing (9WS@170MHz, 52ns)
+    LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);   // nWR inactive (PB5=1)
+    LL_GPIO_SetOutputPin(RS_GPIO_Port, RS_Pin);     // data reg active (PB8=1)
+
+    /* Dummy read */
+    LCD_busModeIn();                                // switch to input mode
+    LL_GPIO_ResetOutputPin(nRD_GPIO_Port, nRD_Pin); // nRD active (PA8=0)
+    nop_3(), nop_3(), nop_3();                      // keep the timing (9WS@170MHz, 52ns)
+    LL_GPIO_ReadInputPort(GPIOC);                   // dummy read
+    LL_GPIO_SetOutputPin(nRD_GPIO_Port, nRD_Pin);   // nRD inactive (PA8=1)
+}
+
+/**
+ * @brief Read the GRAM of LCD
+ *
+ */
+uint16_t LCD_readGRAM(void)
+{
+    uint16_t _dat;
+    LL_GPIO_ResetOutputPin(nRD_GPIO_Port, nRD_Pin); // nRD active (PA8=0)
+    nop_3(), nop_3(), nop_3();                      // keep the timing (9WS@170MHz, 52ns)
+    LL_GPIO_ReadInputPort(GPIOC);                   // dummy read
+    LL_GPIO_SetOutputPin(nRD_GPIO_Port, nRD_Pin);   // nRD inactive (PA8=1)
+    return _dat;
+}
+
+/**
+ * @brief Prepare to write to the GRAM of LCD continuously
+ *
+ */
+void LCD_startWriteGRAM(void)
+{
+    LCD_busModeOut();                               // switch to output mode
+    LL_GPIO_ResetOutputPin(nCS_GPIO_Port, nCS_Pin); // nCS active (PB9=0)
+    LL_GPIO_ResetOutputPin(RS_GPIO_Port, RS_Pin);   // index reg active (PB8=0)
+    LL_GPIO_WriteOutputPort(GPIOC, 0x22);           // write GRAM IO flag reg
+    LL_GPIO_ResetOutputPin(nWR_GPIO_Port, nWR_Pin); // nWR active (PB5=0)
+    nop_3(), nop_3(), nop_3();                      // keep the timing (9WS@170MHz, 52ns)
+    LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);   // nWR inactive (PB5=1)
+    LL_GPIO_SetOutputPin(RS_GPIO_Port, RS_Pin);     // data reg active (PB8=1)
+}
+
+/**
+ * @brief Write to the GRAM of LCD
+ *
+ * @param RGBcode Color code in RGB565
+ */
+void LCD_writeGRAM(uint16_t RGBcode)
+{
+    LL_GPIO_WriteOutputPort(GPIOC, RGBcode);        // write RGB code to GRAM
+    LL_GPIO_ResetOutputPin(nWR_GPIO_Port, nWR_Pin); // nWR active (PB5=0)
+    nop_3(), nop_3(), nop_3();                      // keep the timing (9WS@170MHz, 52ns)
+    LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);   // nWR inactive (PB5=1)
+}
+
+/**
+ * @brief Stop read/write operations to the GRAM of LCD
+ *
+ */
+void LCD_stopGRAM(void)
+{
+    LL_GPIO_SetOutputPin(nCS_GPIO_Port, nCS_Pin); // nCS inactive (PB9=1)
+}
+
+/* Display Control */
+
+/**
+ * @brief Enable display
+ *
+ */
+void LCD_displayOn(void)
+{
+    LCD_setRegVal(0x07, 0x0173);
+}
+
+/**
+ * @brief Disable display
+ *
+ */
+void LCD_displayOff(void)
+{
+    LCD_setRegVal(0x07, 0x0);
+}
+
+/**
+ * @brief Power on the LCD
+ *
+ */
+void LCD_powerOn(void)
+{
+    LCD_setRegVal(0x10, 0x0000);
+    LCD_setRegVal(0x11, 0x0000);
+    LCD_setRegVal(0x12, 0x0000);
+    LCD_setRegVal(0x13, 0x0000);
+    LCD_delay(20);
+    LCD_setRegVal(0x10, 0x17b0);
+    LCD_setRegVal(0x11, 0x0137);
+    LCD_delay(5);
+    LCD_setRegVal(0x12, 0x0139);
+    LCD_delay(5);
+    LCD_setRegVal(0x13, 0x1d00);
+    LCD_setRegVal(0x29, 0x0013);
+    LCD_delay(5);
+    LCD_setRegVal(0x07, 0x0173);
+}
+
+/**
+ * @brief Sets the cursor position.
+ *
+ * @param Xpos Position in row/X/horizon
+ * @param Ypos Position in column/Y/vertical
+ */
+void LCD_setCursor(uint8_t Xpos, uint16_t Ypos)
+{
+    LCD_setRegVal(0x20, Xpos);
+    LCD_setRegVal(0x21, Ypos);
+}
+
+/**
+ * @brief Draw the font of the character
+ *
+ * @param Xpos Start position in row/X/horizon
+ * @param Ypos Start position in column/Y/vertical
+ * @param fontGraph Font graph in bit
+ */
+void LCD_drawFont(uint8_t Xpos, uint16_t Ypos, lcdFont_t *fontGraph)
+{
+    uint8_t rowIdx, colIdx;
+
+    for (rowIdx = 0; rowIdx < font_row; rowIdx++)
+    {
+        LCD_setCursor((Xpos + rowIdx), Ypos); // set position
+
+        LCD_startWriteGRAM(); // start draw
+        for (colIdx = 0; colIdx < font_col; colIdx++)
+        {
+            if (fontGraph[rowIdx] & (1 << colIdx))
+                LCD_writeGRAM(LCD_FrontColor); // 1, set
+            else
+                LCD_writeGRAM(LCD_BackColor); // 0, reset
+        }
+        LCD_stopGRAM(); // stop draw
+    }
+}
+
+/**
+ * @brief Set the display window
+ *
+ * @param Xst Start address of the window in row/X/horizon
+ * @param Yst Start address of the window in column/Y/vertical
+ * @param Xed End address of the window in row/X/horizon
+ * @param Yed End address of the window in column/Y/vertical
+ */
+void LCD_setDispWindow(uint8_t Xst, uint16_t Yst, uint8_t Xed, uint16_t Yed)
+{
+    LCD_setRegVal(0x50, Xst); // R50, HSA[7:0]
+    LCD_setRegVal(0x51, Xed); // R51, HEA[7:0]
+    LCD_setRegVal(0x52, Yst); // R52, VSA[8:0]
+    LCD_setRegVal(0x53, Yed); // R53, VEA[8:0]
+    LCD_setCursor(Xst, Yst);  // set the cursor to the left upper
+}
+
+/**
+ * @brief Disable the window mode
+ *
+ */
+void LCD_windowModeOff(void)
+{
+    LCD_setDispWindow(0, 239, 0, 319); // set to full screen
+    LCD_setRegVal(0x03, 0x1018);       // reset entry mode
+}
+
+/* LCD init. operations */
+
+/**
+ * @brief Configures the register of uc8230
+ *
+ */
+void LCD_init_8230(void)
+{
+    LCD_setRegVal(0x00, 0x0001);
+    LCD_delay(1000);
+    LCD_setRegVal(0x01, 0x0000);
+    LCD_setRegVal(0x10, 0x1790);
+    LCD_setRegVal(0x60, 0x2700);
+    LCD_setRegVal(0x61, 0x0001);
+    LCD_setRegVal(0x46, 0x0002);
+    LCD_setRegVal(0x13, 0x8010);
+    LCD_setRegVal(0x12, 0x80fe);
+    LCD_setRegVal(0x02, 0x0500);
+    LCD_setRegVal(0x03, 0x1030);
+
+    LCD_setRegVal(0x30, 0x0303);
+    LCD_setRegVal(0x31, 0x0303);
+    LCD_setRegVal(0x32, 0x0303);
+    LCD_setRegVal(0x33, 0x0300);
+    LCD_setRegVal(0x34, 0x0003);
+    LCD_setRegVal(0x35, 0x0303);
+    LCD_setRegVal(0x36, 0x0014);
+    LCD_setRegVal(0x37, 0x0303);
+    LCD_setRegVal(0x38, 0x0303);
+    LCD_setRegVal(0x39, 0x0303);
+    LCD_setRegVal(0x3a, 0x0300);
+    LCD_setRegVal(0x3b, 0x0003);
+    LCD_setRegVal(0x3c, 0x0303);
+    LCD_setRegVal(0x3d, 0x1400);
+
+    LCD_setRegVal(0x92, 0x0200);
+    LCD_setRegVal(0x93, 0x0303);
+    LCD_setRegVal(0x90, 0x080d);
+    LCD_setRegVal(0x03, 0x1018);
+    LCD_setRegVal(0x07, 0x0173);
+}
+
+/**
+ * @brief Configures the register of ILI932x
+ *
+ */
+void LCD_init_932x(void)
+{
+    LCD_setRegVal(0xe3, 0x3008); // Set internal timing
+    LCD_setRegVal(0xe7, 0x0012); // Set internal timing
+    LCD_setRegVal(0xef, 0x1231); // Set internal timing
+    LCD_setRegVal(0x01, 0x0000); // set SS and SM bit, 0x0100
+    LCD_setRegVal(0x02, 0x0700); // set 1 line inversion
+    LCD_setRegVal(0x03, 0x1030); // set GRAM write direction and BGR=1.
+    LCD_setRegVal(0x04, 0x0000); // Resize register
+    LCD_setRegVal(0x08, 0x0207); // set the back porch and front porch
+    LCD_setRegVal(0x09, 0x0000); // set non-display area refresh cycle ISC[3:0]
+    LCD_setRegVal(0x0a, 0x0000); // FMARK function
+    LCD_setRegVal(0x0c, 0x0000); // RGB interface setting
+    LCD_setRegVal(0x0d, 0x0000); // Frame marker Position
+    LCD_setRegVal(0x0f, 0x0000); // RGB interface polarity
+
+    /**************Power On sequence ****************/
+    LCD_setRegVal(0x10, 0x0000); // SAP, BT[3:0], AP, DSTB, SLP, STB
+    LCD_setRegVal(0x11, 0x0007); // DC1[2:0], DC0[2:0], VC[2:0]
+    LCD_setRegVal(0x12, 0x0000); // VREG1OUT voltage
+    LCD_setRegVal(0x13, 0x0000); // VDV[4:0] for VCOM amplitude
+    msDelay(200);                // Delay 200 MS , Dis-charge capacitor power voltage
+    LCD_setRegVal(0x10, 0x1690); // SAP, BT[3:0], AP, DSTB, SLP, STB
+    LCD_setRegVal(0x11, 0x0227); // R11H=0x0221 at VCI=3.3V, DC1[2:0], DC0[2:0], VC[2:0]
+    msDelay(50);                 // Delay 50ms
+    LCD_setRegVal(0x12, 0x001D); // External reference voltage= Vci;
+    msDelay(50);                 // Delay 50ms
+    LCD_setRegVal(0x13, 0x0800); // R13H=1D00 when R12H=009D;VDV[4:0] for VCOM amplitude
+    LCD_setRegVal(0x29, 0x0014); // R29H=0013 when R12H=009D;VCM[5:0] for VCOMH
+    LCD_setRegVal(0x2b, 0x000B); // Frame Rate = 96Hz
+    msDelay(50);                 // Delay 50ms
+    LCD_setRegVal(0x20, 0x0000); // GRAM horizontal Address
+    LCD_setRegVal(0x21, 0x0000); // GRAM Vertical Address
+
+    /* ----------- Adjust the Gamma Curve ---------- */
+    LCD_setRegVal(0x30, 0x0007);
+    LCD_setRegVal(0x31, 0x0707);
+    LCD_setRegVal(0x32, 0x0006);
+    LCD_setRegVal(0x35, 0x0704);
+    LCD_setRegVal(0x36, 0x1F04);
+    LCD_setRegVal(0x37, 0x0004);
+    LCD_setRegVal(0x38, 0x0000);
+    LCD_setRegVal(0x39, 0x0706);
+    LCD_setRegVal(0x3c, 0x0701);
+    LCD_setRegVal(0x3d, 0x000F);
+
+    /* ------------------ Set GRAM area --------------- */
+    LCD_setRegVal(0x50, 0x0000); // Horizontal GRAM Start Address
+    LCD_setRegVal(0x51, 0x00EF); // Horizontal GRAM End Address
+    LCD_setRegVal(0x52, 0x0000); // Vertical GRAM Start Address
+    LCD_setRegVal(0x53, 0x013F); // Vertical GRAM Start Address
+    LCD_setRegVal(0x60, 0x2700); // Gate Scan Line, 0xA700
+    LCD_setRegVal(0x61, 0x0001); // NDL,VLE, REV
+    LCD_setRegVal(0x6a, 0x0000); // set scrolling line
+
+    /* -------------- Partial Display Control --------- */
+    LCD_setRegVal(0x80, 0x0000);
+    LCD_setRegVal(0x81, 0x0000);
+    LCD_setRegVal(0x82, 0x0000);
+    LCD_setRegVal(0x83, 0x0000);
+    LCD_setRegVal(0x84, 0x0000);
+    LCD_setRegVal(0x85, 0x0000);
+
+    /* -------------- Panel Control ------------------- */
+    LCD_setRegVal(0x90, 0x0010);
+    LCD_setRegVal(0x92, 0x0000);
+    LCD_setRegVal(0x93, 0x0003);
+    LCD_setRegVal(0x95, 0x0110);
+    LCD_setRegVal(0x97, 0x0000);
+    LCD_setRegVal(0x98, 0x0000);
+
+    /* Set GRAM write direction and BGR = 1 */
+    /* I/D=01 (Horizontal : increment, Vertical : decrement) */
+    /* AM=1 (address is updated in vertical writing direction) */
+    LCD_setRegVal(0x03, 0x1018); // 0x1018
+    LCD_setRegVal(0x07, 0x0173); // 262K color and display ON
+}
+
+/* Public Function */
+
+/**
+ * @brief Initializes the LCD
+ *
+ */
+void LCD_init(void)
+{
+    LCD_busInit();
+    LCD_busReset();
+
+    LCD_Type = LCD_getRegVal(0x0);
+    if (LCD_Type == 0x8230)
+        LCD_init_8230();
+    else
+        LCD_init_932x();
+    LCD_Type = LCD_getRegVal(0x0);
+}
+
+/**
+ * @brief Set the front color
+ *
+ * @param color Front color code in RGB565
+ */
+void LCD_setFrontColor(lcdColor_t _Color)
+{
+    LCD_FrontColor = _Color;
+}
+
+/**
+ * @brief Set the background color
+ *
+ * @param color Background color code in RGB565
+ */
+void LCD_setBackColor(lcdColor_t _Color)
+{
+    LCD_BackColor = _Color;
+}
+
+/**
+ * @brief Clear the whole LCD with the selected color
+ *
+ * @param color Color code in RGB565
+ */
+void LCD_clear(lcdColor_t _Color)
+{
+    uint32_t pixIdx = 76800;
+    LCD_setCursor(0, 0);
+    LCD_startWriteGRAM();
+    while (pixIdx--)
+        LCD_writeGRAM(_Color);
+    LCD_stopGRAM();
+}
+
+/**
+ * @brief Display a line
+ *
+ * @param Xst Start address of the line in row/X/horizon (left upper)
+ * @param Yst Start address of the line in column/Y/vertical (left upper)
+ * @param Xed End address of the line in row/X/horizon (right buttom)
+ * @param Yed End address of the line in column/Y/vertical (right buttom)
+ */
+void LCD_dispLine(uint8_t Xst, uint16_t Yst, uint8_t Xed, uint16_t Yed)
+{
+    LCD_setCursor(Xst, Yst); // set the cursor to the left upper
+
+    if (Xst == Xed) /* Horizontal line */
+    {
+    }
+
+    else if (Yst == Yed) /* Vertical line */
+    {
+    }
+
+    else
+    {
+    }
+}
+/**
+ * @brief Display a rectangle
+ *
+ * @param Xst Start address of the rectangle in row/X/horizon (left upper)
+ * @param Yst Start address of the rectangle in column/Y/vertical (left upper)
+ * @param Xed End address of the rectangle in row/X/horizon (right buttom)
+ * @param Yed End address of the rectangle in column/Y/vertical (right buttom)
+ */
+void LCD_dispRect(uint8_t Xst, uint16_t Yst, uint8_t Xed, uint16_t Yed)
+{
+}
+
+/**
+ * @brief Display a circle
+ *
+ * @param Xpos Address of the center of the circle in row/X/horizon
+ * @param Ypos Address of the center of the circle in column/Y/vertical
+ * @param _Radius Radius of the circle
+ */
+void LCD_dispCircle(uint8_t Xpos, uint16_t Ypos, uint16_t _Radius)
+{
 }
