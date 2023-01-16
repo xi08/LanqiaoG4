@@ -530,14 +530,27 @@ void LCD_clear(lcdColor_t _Color)
  */
 void LCD_dispLine(uint8_t Xst, uint16_t Yst, uint8_t Xed, uint16_t Yed)
 {
-    LCD_setCursor(Xst, Yst); // set the cursor to the left upper
+    uint16_t length_X = (Xed - Xst), length_Y = (Yed - Yst);
+    uint16_t idx;
 
     if (Xst == Xed) /* Horizontal line */
     {
+        LCD_setCursor(Xst, Yst); // set the cursor to the front
+        LCD_startWriteGRAM();
+        while (length_Y--)
+            LCD_writeGRAM(LCD_FrontColor);
+        LCD_stopGRAM();
     }
 
     else if (Yst == Yed) /* Vertical line */
     {
+        for (idx = 0; idx < length_X; idx++)
+        {
+            LCD_setCursor(Xst + idx, Yst); // set the cursor to the front
+            LCD_startWriteGRAM();
+            LCD_writeGRAM(LCD_FrontColor);
+            LCD_stopGRAM();
+        }
     }
 
     else
@@ -554,6 +567,10 @@ void LCD_dispLine(uint8_t Xst, uint16_t Yst, uint8_t Xed, uint16_t Yed)
  */
 void LCD_dispRect(uint8_t Xst, uint16_t Yst, uint8_t Xed, uint16_t Yed)
 {
+    LCD_dispLine(Xst, Yst, Xst, Yed);
+    LCD_dispLine(Xst, Yst, Xed, Yst);
+    LCD_dispLine(Xst, Yed, Xed, Yed);
+    LCD_dispLine(Xed, Yst, Xed, Yed);
 }
 
 /**
