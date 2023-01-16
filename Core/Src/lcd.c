@@ -582,4 +582,59 @@ void LCD_dispRect(uint8_t Xst, uint16_t Yst, uint8_t Xed, uint16_t Yed)
  */
 void LCD_dispCircle(uint8_t Xpos, uint16_t Ypos, uint16_t _Radius)
 {
+    uint16_t Xoffset = 0, Yoffset = _Radius;
+    int16_t D = 3 - (_Radius << 1);
+
+    while (Xoffset <= Yoffset)
+    {
+        LCD_setCursor(Xpos + Xoffset, Ypos + Yoffset);
+        LCD_startWriteGRAM();
+        LCD_writeGRAM(LCD_FrontColor);
+        LCD_stopGRAM();
+
+        LCD_setCursor(Xpos + Xoffset, Ypos - Yoffset);
+        LCD_startWriteGRAM();
+        LCD_writeGRAM(LCD_FrontColor);
+        LCD_stopGRAM();
+
+        LCD_setCursor(Xpos - Xoffset, Ypos + Yoffset);
+        LCD_startWriteGRAM();
+        LCD_writeGRAM(LCD_FrontColor);
+        LCD_stopGRAM();
+
+        LCD_setCursor(Xpos - Xoffset, Ypos - Yoffset);
+        LCD_startWriteGRAM();
+        LCD_writeGRAM(LCD_FrontColor);
+        LCD_stopGRAM();
+
+        LCD_setCursor(Xpos + Yoffset, Ypos + Xoffset);
+        LCD_startWriteGRAM();
+        LCD_WriteRAM(LCD_FrontColor);
+        LCD_stopGRAM();
+
+        LCD_setCursor(Xpos + Yoffset, Ypos - Xoffset);
+        LCD_startWriteGRAM();
+        LCD_WriteRAM(LCD_FrontColor);
+        LCD_stopGRAM();
+
+        LCD_setCursor(Xpos - Yoffset, Ypos + Xoffset);
+        LCD_startWriteGRAM();
+        LCD_WriteRAM(LCD_FrontColor);
+        LCD_stopGRAM();
+
+        LCD_setCursor(Xpos - Yoffset, Ypos - Xoffset);
+        LCD_startWriteGRAM();
+        LCD_WriteRAM(LCD_FrontColor);
+        LCD_stopGRAM();
+
+        if (D < 0)
+            D += (Xoffset << 2) + 6;
+
+        else
+        {
+            D += ((Xoffset - Yoffset) << 2) + 10;
+            Yoffset--;
+        }
+        Xoffset++;
+    }
 }
