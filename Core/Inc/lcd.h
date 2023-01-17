@@ -34,7 +34,7 @@ void LCD_init(void);
 void LCD_setFrontColor(lcdColor_t _Color);
 void LCD_setBackColor(lcdColor_t _Color);
 void LCD_clear(lcdColor_t _Color);
-void LCD_clearRow(void);
+void LCD_clearRow(uint8_t _Row);
 void LCD_dispChar(uint8_t _Row, uint16_t _Col, char _Ch);
 void LCD_dispString(uint8_t _Row, char *_Str);
 void LCD_dispLine(uint8_t Xst, uint16_t Yst, uint8_t Xed, uint16_t Yed);

@@ -4,6 +4,7 @@
 
 volatile static lcdColor_t LCD_FrontColor = 0x0000, LCD_BackColor = 0xffff;
 volatile uint16_t LCD_Type;
+const char whiteLine[] = "                    ";
 
 #define nop_3() (__nop(), __nop(), __nop())
 
@@ -521,6 +522,46 @@ void LCD_clear(lcdColor_t _Color)
 }
 
 /**
+ * @brief Clear the selected row
+ *
+ */
+void LCD_clearRow(uint8_t _Row)
+{
+    LCD_DisplayStringLine(_Row, whiteLine);
+}
+
+/**
+ * @brief Displays one character (16 dots width, 24 dots height)
+ *
+ * @param _Row the row where to display the character
+ * @param _Col the column where to display the character
+ * @param _Ch character ascii code
+ */
+void LCD_dispChar(uint8_t _Row, uint16_t _Col, char _Ch)
+{
+    LCD_drawFont(_Row, _Col, &ascii_map[_Ch - 0x20]);
+}
+
+/**
+ * @brief Displays a maximum of 20 char on the LCD.
+ *
+ * @param _Row the row where to display the character
+ * @param _Str the string to display on screen
+ */
+void LCD_dispString(uint8_t _Row, char *_Str)
+{
+    uint8_t str_idx = 20;
+    uint16_t col_idx = 319;
+
+    while (*_Str & str_idx--)
+    {
+        LCD_dispChar(_Row, col_idx, (*_Str));
+        col_idx -= 16;
+        _Str++;
+    }
+}
+
+/**
  * @brief Display a line
  *
  * @param Xst Start address of the line in row/X/horizon (left upper)
@@ -530,7 +571,7 @@ void LCD_clear(lcdColor_t _Color)
  */
 void LCD_dispLine(uint8_t Xst, uint16_t Yst, uint8_t Xed, uint16_t Yed)
 {
-    uint16_t length_X = (Xed - Xst), length_Y = (Yed - Yst);
+    uint16_t length_X = Xed - Xst, length_Y = Yed - Yst;
     uint16_t idx;
 
     if (Xst == Xed) /* Horizontal line */
@@ -557,6 +598,7 @@ void LCD_dispLine(uint8_t Xst, uint16_t Yst, uint8_t Xed, uint16_t Yed)
     {
     }
 }
+
 /**
  * @brief Display a rectangle
  *
