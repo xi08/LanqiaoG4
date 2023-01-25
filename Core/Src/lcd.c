@@ -2,9 +2,13 @@
 #include "lcd.h"
 #include "font.h"
 
-volatile static lcdColor_t LCD_FrontColor = 0x0000, LCD_BackColor = 0xffff;
 volatile uint16_t LCD_Type;
+
 const char whiteLine[] = "                    ";
+
+volatile static lcdColor_t LCD_FrontColor = 0x0000;
+
+volatile static lcdColor_t LCD_BackColor = 0xffff;
 
 #define nop_3() (__nop(), __nop(), __nop())
 
@@ -679,4 +683,13 @@ void LCD_dispCircle(uint8_t Xpos, uint16_t Ypos, uint16_t _Radius)
         }
         Xoffset++;
     }
+}
+
+/**
+ * @brief Display a monocolor picture
+ *
+ * @param _Pic pointer to the picture array
+ */
+void LCD_dispMonoPic(const uint32_t *_Pic)
+{
 }

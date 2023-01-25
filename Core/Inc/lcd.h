@@ -27,9 +27,6 @@ typedef const uint16_t lcdFont_t;
 #define Row8 192
 #define Row9 216
 
-#define Horizontal 0x00
-#define Vertical 0x01
-
 void LCD_init(void);
 void LCD_setFrontColor(lcdColor_t _Color);
 void LCD_setBackColor(lcdColor_t _Color);
@@ -40,5 +37,7 @@ void LCD_dispString(uint8_t _Row, char *_Str);
 void LCD_dispLine(uint8_t Xst, uint16_t Yst, uint8_t Xed, uint16_t Yed);
 void LCD_dispRect(uint8_t Xst, uint16_t Yst, uint8_t Xed, uint16_t Yed);
 void LCD_dispCircle(uint8_t Xpos, uint16_t Ypos, uint16_t _Radius);
+void LCD_dispMonoPic(const uint32_t *_Pic);
+void LCD_dispColorPic(void);
 
 #endif
