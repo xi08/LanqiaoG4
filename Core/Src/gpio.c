@@ -22,7 +22,7 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN 0 */
-uint32_t keyUpdate_TS[keyNum];
+uint8_t keyScanCnt[keyNum], keyTimeCnt[keyNum];
 keyState_enum keyState[keyNum];
 /* USER CODE END 0 */
 
@@ -80,22 +80,10 @@ void MX_GPIO_Init(void)
     LL_GPIO_ResetOutputPin(LE_GPIO_Port, LE_Pin);
 
     /**/
-    LL_GPIO_SetOutputPin(nRD_GPIO_Port, nRD_Pin);
-
-    /**/
-    LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
-
-    /**/
     LL_GPIO_SetOutputPin(SCL_GPIO_Port, SCL_Pin);
 
     /**/
     LL_GPIO_SetOutputPin(SDA_GPIO_Port, SDA_Pin);
-
-    /**/
-    LL_GPIO_SetOutputPin(RS_GPIO_Port, RS_Pin);
-
-    /**/
-    LL_GPIO_SetOutputPin(nCS_GPIO_Port, nCS_Pin);
 
     /**/
     GPIO_InitStruct.Pin = LD6_Pin;
@@ -162,14 +150,6 @@ void MX_GPIO_Init(void)
     LL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
 
     /**/
-    GPIO_InitStruct.Pin = nRD_Pin;
-    GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-    LL_GPIO_Init(nRD_GPIO_Port, &GPIO_InitStruct);
-
-    /**/
     GPIO_InitStruct.Pin = LD3_Pin;
     GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
     GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
@@ -202,14 +182,6 @@ void MX_GPIO_Init(void)
     LL_GPIO_Init(LE_GPIO_Port, &GPIO_InitStruct);
 
     /**/
-    GPIO_InitStruct.Pin = nWR_Pin;
-    GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-    LL_GPIO_Init(nWR_GPIO_Port, &GPIO_InitStruct);
-
-    /**/
     GPIO_InitStruct.Pin = SCL_Pin;
     GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
     GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
@@ -224,22 +196,6 @@ void MX_GPIO_Init(void)
     GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
     GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
     LL_GPIO_Init(SDA_GPIO_Port, &GPIO_InitStruct);
-
-    /**/
-    GPIO_InitStruct.Pin = RS_Pin;
-    GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-    LL_GPIO_Init(RS_GPIO_Port, &GPIO_InitStruct);
-
-    /**/
-    GPIO_InitStruct.Pin = nCS_Pin;
-    GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-    LL_GPIO_Init(nCS_GPIO_Port, &GPIO_InitStruct);
 }
 
 /* USER CODE BEGIN 2 */
@@ -255,36 +211,67 @@ void keyUpdate(void)
 
     while (i--)
     {
-        /* Pressed */
-        if ((keyInfo & (1 << i)) == 1)
+        if (keyTimeCnt[i] > 16) /* Timeout */
         {
             switch (keyState[i])
             {
-            case S0:
-                keyState[i] = S2;          // switch state
-                keyUpdate_TS[i] = sysTime; // update timestamp
+            case S1:
+                if (!keyScanCnt[i])   // No KeyUp
+                    keyState[i] = S4; // Long
+                break;
+            case S2:
+                if (keyScanCnt[i] == 2)
+                    keyState[i] = S5; // Double
+                else if (keyScanCnt[i] == 1)
+                    keyState[i] = S3; // Short
+                break;
+            default:
+                break;
+            }
+        }
+
+        else if ((keyInfo & (1 << i))) /* KeyDown */
+        {
+
+            switch (keyState[i])
+            {
+            case S0:               // Initial State
+                keyState[i] = S1;  // switch state to KeyDown
+                keyScanCnt[i] = 0; // set scan counter to initial state
+                keyTimeCnt[i] = 0; // set time counter to initial state
+                break;
+
+            case S1:              // KeyDown State
+                keyState[i] = S1; // keep KeyDown state
+                keyTimeCnt[i]++;  // update time counter
+                break;
+
+            case S2:              // KeyUp State
+                keyState[i] = S2; // update state to KeyUp
+                keyTimeCnt[i]++;  // update time counter
+                keyScanCnt[i]++;  // update scan counter
                 break;
 
             default:
                 break;
             }
         }
-        /* Not Pressed */
-        if ((keyInfo & (1 << i)) == 0)
+
+        else if (!(keyInfo & (1 << i))) /* KeyUp */
         {
             switch (keyState[i])
             {
-            case S2:
-                if (sysTime - keyUpdate_TS[i] >= keyLongPressTime) // S3 detection
-                    keyState[i] = S3;
-                else if (sysTime - keyUpdate_TS[i] >= keyShortPressTime) // S1 detection
-                    keyState[i] = S1;
-                else
-                    keyState[i] = S0; // reset state
+            case S1:              // KeyDown State
+                keyState[i] = S1; // update state to KeyDown
+                keyTimeCnt[i]++;  // update time counter
+                break;
+
+            case S2:              // KeyUp State
+                keyState[i] = S2; // keep KeyUp state
+                keyTimeCnt[i]++;  // update time counter
                 break;
 
             default:
-                keyState[i] = S0; // reset state
                 break;
             }
         }

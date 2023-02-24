@@ -47,7 +47,6 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "lcd.h"
 #include <stdint.h>
 /* USER CODE END Includes */
 
@@ -56,10 +55,12 @@ extern "C" {
 
 typedef enum 
 {
-    S0, /* Empty/Initial */
-    S1, /* Short */
-    S2, /* Pressed */
-    S3, /* Long */
+    S0, /* Initial */
+    S1, /* KeyDown */
+    S2, /* KeyUp */
+    S3, /* Short */
+    S4, /* Long */
+    S5, /* Double */
 } keyState_enum;
 
 /* USER CODE END ET */
@@ -68,7 +69,7 @@ typedef enum
 /* USER CODE BEGIN EC */
 
 extern volatile uint32_t sysTime;
-
+extern volatile uint8_t sysTimeFlag_keyScan;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -105,12 +106,10 @@ void usDelay(uint32_t t);
 #define LD1_GPIO_Port GPIOC
 #define LD2_Pin LL_GPIO_PIN_9
 #define LD2_GPIO_Port GPIOC
-#define nRD_Pin LL_GPIO_PIN_8
-#define nRD_GPIO_Port GPIOA
-#define TXD1_Pin LL_GPIO_PIN_9
-#define TXD1_GPIO_Port GPIOA
-#define RXD1_Pin LL_GPIO_PIN_10
-#define RXD1_GPIO_Port GPIOA
+#define TXD_Pin LL_GPIO_PIN_9
+#define TXD_GPIO_Port GPIOA
+#define RXD_Pin LL_GPIO_PIN_10
+#define RXD_GPIO_Port GPIOA
 #define R40_Pin LL_GPIO_PIN_15
 #define R40_GPIO_Port GPIOA
 #define LD3_Pin LL_GPIO_PIN_10
@@ -121,16 +120,10 @@ void usDelay(uint32_t t);
 #define LD5_GPIO_Port GPIOC
 #define LE_Pin LL_GPIO_PIN_2
 #define LE_GPIO_Port GPIOD
-#define nWR_Pin LL_GPIO_PIN_5
-#define nWR_GPIO_Port GPIOB
 #define SCL_Pin LL_GPIO_PIN_6
 #define SCL_GPIO_Port GPIOB
 #define SDA_Pin LL_GPIO_PIN_7
 #define SDA_GPIO_Port GPIOB
-#define RS_Pin LL_GPIO_PIN_8
-#define RS_GPIO_Port GPIOB
-#define nCS_Pin LL_GPIO_PIN_9
-#define nCS_GPIO_Port GPIOB
 #ifndef NVIC_PRIORITYGROUP_0
 #define NVIC_PRIORITYGROUP_0         ((uint32_t)0x00000007) /*!< 0 bit  for pre-emption priority,
                                                                  4 bits for subpriority */
