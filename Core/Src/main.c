@@ -49,7 +49,6 @@
 
 volatile uint32_t sysTime = 0;
 
-volatile uint8_t sysTimeFlag_keyScan = 0;
 extern keyState_enum keyState[keyNum];
 
 uint8_t ledBuffer = 0;
@@ -105,32 +104,35 @@ int main(void)
     SystemClock_Config();
 
     /* USER CODE BEGIN SysInit */
-    LL_SYSTICK_EnableIT();
+
     /* USER CODE END SysInit */
 
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
     MX_TIM2_Init();
     MX_USART1_UART_Init();
+    MX_TIM7_Init();
     /* USER CODE BEGIN 2 */
 
     ledBuffer = 0b1;
     ledUpdate(ledBuffer);
-
+    LL_mDelay(100);
+    printf("Init OK\n");
     /* USER CODE END 2 */
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     while (1)
     {
-        if (sysTimeFlag_keyScan > 20)
-        {
-            sysTimeFlag_keyScan = 0;
-            keyUpdate();
-            keyResp();
-        }
 
+        keyUpdate();
+        keyResp();
         ledUpdate(ledBuffer);
+        if (uartRxOKFlag)
+        {
+            uartRxOKFlag = 0;
+            printf("%s", uartRxBuffer);
+        }
 
         /* USER CODE END WHILE */
 
@@ -191,7 +193,7 @@ void keyResp(void)
 
         ledBuffer <<= 1;
         if (ledBuffer == 0)
-            ledBuffer = 1;
+            ledBuffer = 0b1;
 
         keyState[0] = S0; // reset state
         break;
@@ -211,7 +213,7 @@ void keyResp(void)
     case S3: // Short
         ledBuffer >>= 1;
         if (ledBuffer == 0)
-            ledBuffer = 1;
+            ledBuffer = 0b10000000;
 
         keyState[1] = S0; // reset state
         break;
@@ -266,6 +268,7 @@ void uart_ReceiveIRQ(void)
 
     if (ch == (uint8_t)('\r'))
     {
+        uartRxBuffer[uartRxBufferIdx] = 0;
         uartRxBufferIdx = 0;
         uartRxOKFlag = 1;
     }

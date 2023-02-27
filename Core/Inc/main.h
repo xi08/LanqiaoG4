@@ -57,10 +57,8 @@ typedef enum
 {
     S0, /* Initial */
     S1, /* KeyDown */
-    S2, /* KeyUp */
     S3, /* Short */
     S4, /* Long */
-    S5, /* Double */
 } keyState_enum;
 
 /* USER CODE END ET */
@@ -69,7 +67,6 @@ typedef enum
 /* USER CODE BEGIN EC */
 
 extern volatile uint32_t sysTime;
-extern volatile uint8_t sysTimeFlag_keyScan;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -82,8 +79,6 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void uart_ReceiveIRQ(void);
-void msDelay(uint32_t t);
-void usDelay(uint32_t t);
 
 /* USER CODE END EFP */
 

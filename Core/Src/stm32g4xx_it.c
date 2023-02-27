@@ -183,10 +183,10 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
-  sysTime++;
-  sysTimeFlag_keyScan++;
+
   /* USER CODE END SysTick_IRQn 0 */
   /* USER CODE BEGIN SysTick_IRQn 1 */
+  
   /* USER CODE END SysTick_IRQn 1 */
 }
 
@@ -203,14 +203,31 @@ void SysTick_Handler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
+
+  /* USER CODE END USART1_IRQn 0 */
+  /* USER CODE BEGIN USART1_IRQn 1 */
   if(LL_USART_IsActiveFlag_RXNE(USART1))
   {
     uart_ReceiveIRQ();
   }
-  /* USER CODE END USART1_IRQn 0 */
-  /* USER CODE BEGIN USART1_IRQn 1 */
-
   /* USER CODE END USART1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM7 global interrupt.
+  */
+void TIM7_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM7_IRQn 0 */
+  if(LL_TIM_IsActiveFlag_UPDATE(TIM7))
+  {
+    LL_TIM_ClearFlag_UPDATE(TIM7);
+    sysTime++;
+  }
+  /* USER CODE END TIM7_IRQn 0 */
+  /* USER CODE BEGIN TIM7_IRQn 1 */
+
+  /* USER CODE END TIM7_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
