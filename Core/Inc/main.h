@@ -28,6 +28,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 
+#include "stm32g4xx_ll_adc.h"
 #include "stm32g4xx_ll_rcc.h"
 #include "stm32g4xx_ll_bus.h"
 #include "stm32g4xx_ll_crs.h"
@@ -79,7 +80,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void uart_ReceiveIRQ(void);
-
+void usDelay(uint32_t t);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -97,10 +98,18 @@ void uart_ReceiveIRQ(void);
 #define B2_GPIO_Port GPIOB
 #define B3_Pin LL_GPIO_PIN_2
 #define B3_GPIO_Port GPIOB
+#define R38_Pin LL_GPIO_PIN_12
+#define R38_GPIO_Port GPIOB
+#define MCP407_Pin LL_GPIO_PIN_14
+#define MCP407_GPIO_Port GPIOB
+#define R37_Pin LL_GPIO_PIN_15
+#define R37_GPIO_Port GPIOB
 #define LD1_Pin LL_GPIO_PIN_8
 #define LD1_GPIO_Port GPIOC
 #define LD2_Pin LL_GPIO_PIN_9
 #define LD2_GPIO_Port GPIOC
+#define nRD_Pin LL_GPIO_PIN_8
+#define nRD_GPIO_Port GPIOA
 #define TXD_Pin LL_GPIO_PIN_9
 #define TXD_GPIO_Port GPIOA
 #define RXD_Pin LL_GPIO_PIN_10
@@ -115,10 +124,16 @@ void uart_ReceiveIRQ(void);
 #define LD5_GPIO_Port GPIOC
 #define LE_Pin LL_GPIO_PIN_2
 #define LE_GPIO_Port GPIOD
+#define nWR_Pin LL_GPIO_PIN_5
+#define nWR_GPIO_Port GPIOB
 #define SCL_Pin LL_GPIO_PIN_6
 #define SCL_GPIO_Port GPIOB
 #define SDA_Pin LL_GPIO_PIN_7
 #define SDA_GPIO_Port GPIOB
+#define RS_Pin LL_GPIO_PIN_8
+#define RS_GPIO_Port GPIOB
+#define nCS_Pin LL_GPIO_PIN_9
+#define nCS_GPIO_Port GPIOB
 #ifndef NVIC_PRIORITYGROUP_0
 #define NVIC_PRIORITYGROUP_0         ((uint32_t)0x00000007) /*!< 0 bit  for pre-emption priority,
                                                                  4 bits for subpriority */
