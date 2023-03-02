@@ -68,6 +68,7 @@ typedef enum
 /* USER CODE BEGIN EC */
 
 extern volatile uint32_t sysTime;
+extern volatile uint8_t sysTime_10msFlag;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -81,6 +82,8 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 void uart_ReceiveIRQ(void);
 void usDelay(uint32_t t);
+void msDelay(uint32_t t);
+void adc_getVal(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

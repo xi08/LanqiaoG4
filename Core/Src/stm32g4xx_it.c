@@ -223,6 +223,7 @@ void TIM7_IRQHandler(void)
   {
     LL_TIM_ClearFlag_UPDATE(TIM7);
     sysTime++;
+    if(sysTime%10==0) sysTime_10msFlag=1;
   }
   /* USER CODE END TIM7_IRQn 0 */
   /* USER CODE BEGIN TIM7_IRQn 1 */

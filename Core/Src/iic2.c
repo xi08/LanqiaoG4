@@ -2,12 +2,12 @@
 
 #define i2cDelay() usDelay(10)
 
-inline uint32_t i2cSDAInput(void)
+inline static uint32_t i2cSDAInput(void)
 {
     return LL_GPIO_IsInputPinSet(SDA_GPIO_Port, SDA_Pin);
 }
 
-inline void i2cSCLOutput(uint8_t x)
+inline static void i2cSCLOutput(uint8_t x)
 {
     if (x)
         LL_GPIO_SetOutputPin(SCL_GPIO_Port, SCL_Pin);
@@ -15,7 +15,7 @@ inline void i2cSCLOutput(uint8_t x)
         LL_GPIO_ResetOutputPin(SCL_GPIO_Port, SCL_Pin);
 }
 
-inline void i2cSDAOutput(uint8_t x)
+inline static void i2cSDAOutput(uint8_t x)
 {
     if (x)
         LL_GPIO_SetOutputPin(SDA_GPIO_Port, SDA_Pin);
@@ -31,7 +31,6 @@ void i2cReset(void)
 {
     uint8_t i;
 
-    /* 连续发送9个时钟 */
     for (i = 0; i < 9; i++)
     {
         i2cSCLOutput(1);
@@ -108,7 +107,6 @@ void i2cNACK(void)
 uint8_t i2cWaitACK(void)
 {
     uint8_t errTime = 5;
-    i2cInputMode();
     i2cDelay();
     i2cSCLOutput(1);
     i2cDelay();
@@ -118,14 +116,12 @@ uint8_t i2cWaitACK(void)
         i2cDelay();
         if (!errTime)
         {
-            i2cOutputMode();
             i2cSTOP();
             return 1;
         }
     }
     i2cSCLOutput(0);
     i2cDelay();
-    i2cOutputMode();
     return 0;
 }
 
@@ -137,7 +133,6 @@ uint8_t i2cWaitACK(void)
 void i2cSend(uint8_t dat)
 {
     uint8_t i;
-    i2cOutputMode();
     for (i = 0; i < 8; i++)
     {
         i2cSCLOutput(0);
@@ -161,7 +156,6 @@ uint8_t i2cReceive(void)
 {
     uint8_t i;
     uint8_t data = 0;
-    i2cInputMode();
     for (i = 0; i < 8; i++)
     {
         data <<= 1;
@@ -171,6 +165,5 @@ uint8_t i2cReceive(void)
         i2cSCLOutput(0);
         i2cDelay();
     }
-    i2cOutputMode();
     return data;
 }

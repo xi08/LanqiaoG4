@@ -4,17 +4,17 @@
 
 volatile uint16_t LCD_Type;
 
-const char whiteLine[] = "                    ";
+char whiteLine[] = "                    ";
 
-volatile static lcdColor_t LCD_FrontColor = 0x0000;
+volatile lcdColor_t LCD_FrontColor = 0x0000;
 
-volatile static lcdColor_t LCD_BackColor = 0xffff;
+volatile lcdColor_t LCD_BackColor = 0xffff;
 
 #define nop_3() (__nop(), __nop(), __nop())
 
-inline void LCD_delay(uint16_t t)
+inline static void LCD_delay(uint16_t t)
 {
-    LL_mDelay(t);
+    usDelay(38*t);
 }
 
 /* legacy support */
@@ -23,7 +23,7 @@ inline void LCD_delay(uint16_t t)
  * @brief Configures the Parallel interface for LCD for input
  *
  */
-void LCD_BusIn(void)
+void LCD_busInCfg(void)
 {
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
@@ -38,7 +38,7 @@ void LCD_BusIn(void)
  * @brief Configures the Parallel interface for LCD for output
  *
  */
-void LCD_BusOut(void)
+void LCD_busOutCfg(void)
 {
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
@@ -532,7 +532,7 @@ void LCD_clear(lcdColor_t _Color)
  */
 void LCD_clearRow(uint8_t _Row)
 {
-    LCD_DisplayStringLine(_Row, whiteLine);
+    LCD_dispString(_Row, whiteLine);
 }
 
 /**
@@ -544,7 +544,7 @@ void LCD_clearRow(uint8_t _Row)
  */
 void LCD_dispChar(uint8_t _Row, uint16_t _Col, char _Ch)
 {
-    LCD_drawFont(_Row, _Col, &ascii_map[_Ch - 0x20]);
+    LCD_drawFont(_Row, _Col, ascii_map[_Ch - 0x20]);
 }
 
 /**
@@ -656,22 +656,22 @@ void LCD_dispCircle(uint8_t Xpos, uint16_t Ypos, uint16_t _Radius)
 
         LCD_setCursor(Xpos + Yoffset, Ypos + Xoffset);
         LCD_startWriteGRAM();
-        LCD_WriteRAM(LCD_FrontColor);
+        LCD_writeGRAM(LCD_FrontColor);
         LCD_stopGRAM();
 
         LCD_setCursor(Xpos + Yoffset, Ypos - Xoffset);
         LCD_startWriteGRAM();
-        LCD_WriteRAM(LCD_FrontColor);
+        LCD_writeGRAM(LCD_FrontColor);
         LCD_stopGRAM();
 
         LCD_setCursor(Xpos - Yoffset, Ypos + Xoffset);
         LCD_startWriteGRAM();
-        LCD_WriteRAM(LCD_FrontColor);
+        LCD_writeGRAM(LCD_FrontColor);
         LCD_stopGRAM();
 
         LCD_setCursor(Xpos - Yoffset, Ypos - Xoffset);
         LCD_startWriteGRAM();
-        LCD_WriteRAM(LCD_FrontColor);
+        LCD_writeGRAM(LCD_FrontColor);
         LCD_stopGRAM();
 
         if (D < 0)
