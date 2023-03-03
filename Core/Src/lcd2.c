@@ -17,39 +17,6 @@ inline static void LCD_delay(uint16_t t)
     usDelay(38*t);
 }
 
-/* legacy support */
-
-/**
- * @brief Configures the Parallel interface for LCD for input
- *
- */
-void LCD_busInCfg(void)
-{
-    LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-    GPIO_InitStruct.Pin = LL_GPIO_PIN_ALL;
-    GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
-    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-    LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-}
-
-/**
- * @brief Configures the Parallel interface for LCD for output
- *
- */
-void LCD_busOutCfg(void)
-{
-    LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-    GPIO_InitStruct.Pin = LL_GPIO_PIN_ALL;
-    GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-    LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-}
-
 /* Bus Control */
 
 /**

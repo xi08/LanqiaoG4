@@ -68,7 +68,7 @@ typedef enum
 /* USER CODE BEGIN EC */
 
 extern volatile uint32_t sysTime;
-extern volatile uint8_t sysTime_10msFlag;
+extern volatile uint8_t sysTime_msFlag;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -156,6 +156,11 @@ void adc_getVal(void);
 #define keyLongPressTime 800 /* time of long press in ms */
 #define keyShortPressTime 50 /* time of short press in ms */
 #define uartBufferSize 128 /* size of uart buffer */
+
+#define sysTime_msFlag_5ms (1 << 0)
+#define sysTime_msFlag_10ms (1 << 1)
+#define sysTime_msFlag_100ms (1 << 2)
+#define sysTime_msFlag_1000ms (1 << 3)
 
 /* USER CODE END Private defines */
 

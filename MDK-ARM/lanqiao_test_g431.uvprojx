@@ -190,7 +190,7 @@
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
-            <useUlib>0</useUlib>
+            <useUlib>1</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
@@ -330,10 +330,10 @@
             <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>3</v6Lang>
-            <v6LangP>3</v6LangP>
+            <v6LangP>5</v6LangP>
             <vShortEn>1</vShortEn>
             <vShortWch>1</vShortWch>
-            <v6Lto>1</v6Lto>
+            <v6Lto>0</v6Lto>
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
@@ -430,19 +430,14 @@
               <FilePath>..\Core\Src\i2c.c</FilePath>
             </File>
             <File>
-              <FileName>iic2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\Src\iic2.c</FilePath>
-            </File>
-            <File>
               <FileName>lcd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\lcd.c</FilePath>
             </File>
             <File>
-              <FileName>lcd2.c</FileName>
+              <FileName>ee_mcp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Core\Src\lcd2.c</FilePath>
+              <FilePath>..\Core\Src\ee_mcp.c</FilePath>
             </File>
           </Files>
         </Group>

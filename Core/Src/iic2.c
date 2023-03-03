@@ -89,7 +89,7 @@ void i2cACK(void)
  * @brief Send I2C NACK Signal
  *
  */
-void i2cNACK(void)
+void i2cNAK(void)
 {
     i2cSDAOutput(1);
     i2cDelay();

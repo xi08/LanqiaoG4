@@ -293,11 +293,13 @@ void keyUpdate(void)
     }
 }
 
-void ledUpdate(uint8_t _led)
+void ledUpdate(uint8_t led)
 {
-    LL_GPIO_WriteOutputPort(LD1_GPIO_Port, ~_led << 8); // set led data pin
+    LL_GPIO_WriteOutputPort(LD1_GPIO_Port, ~led << 8); // set led data pin
     LL_GPIO_SetOutputPin(LE_GPIO_Port, LE_Pin);         // stop latch
+    __nop();__nop();__nop();
     LL_GPIO_ResetOutputPin(LE_GPIO_Port, LE_Pin);       // start latch
+    __nop();__nop();__nop();
 }
 
 /* USER CODE END 2 */
