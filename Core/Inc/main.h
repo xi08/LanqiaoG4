@@ -29,6 +29,7 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 
 #include "stm32g4xx_ll_adc.h"
+#include "stm32g4xx_ll_dac.h"
 #include "stm32g4xx_ll_rcc.h"
 #include "stm32g4xx_ll_bus.h"
 #include "stm32g4xx_ll_crs.h"
@@ -69,6 +70,7 @@ typedef enum
 
 extern volatile uint32_t sysTime;
 extern volatile uint8_t sysTime_msFlag;
+extern uint16_t r39Val, r40Val;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -95,6 +97,8 @@ void adc_getVal(void);
 #define LD8_GPIO_Port GPIOC
 #define B4_Pin LL_GPIO_PIN_0
 #define B4_GPIO_Port GPIOA
+#define DACout_Pin LL_GPIO_PIN_4
+#define DACout_GPIO_Port GPIOA
 #define B1_Pin LL_GPIO_PIN_0
 #define B1_GPIO_Port GPIOB
 #define B2_Pin LL_GPIO_PIN_1
@@ -127,6 +131,8 @@ void adc_getVal(void);
 #define LD5_GPIO_Port GPIOC
 #define LE_Pin LL_GPIO_PIN_2
 #define LE_GPIO_Port GPIOD
+#define R39_Pin LL_GPIO_PIN_4
+#define R39_GPIO_Port GPIOB
 #define nWR_Pin LL_GPIO_PIN_5
 #define nWR_GPIO_Port GPIOB
 #define SCL_Pin LL_GPIO_PIN_6

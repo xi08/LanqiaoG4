@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
+#include "dac.h"
 #include "gpio.h"
 #include "tim.h"
 #include "usart.h"
@@ -62,8 +63,9 @@ char uartRxBuffer[uartBufferSize];
 uint8_t uartRxBufferIdx = 0;
 uint8_t uartRxOKFlag = 0;
 
-float adcVal_R37, adcVal_R38, adcVal_MCP, MCP_ResVal;
-uint8_t mcp_val;
+float r37V, r38V, mcpV, mcpR;
+uint8_t mcp_res;
+uint16_t r39Val, r40Val;
 
 /* USER CODE END PV */
 
@@ -123,12 +125,13 @@ int main(void)
     MX_ADC1_Init();
     MX_ADC2_Init();
     MX_TIM17_Init();
+    MX_DAC1_Init();
+    MX_TIM3_Init();
     /* USER CODE BEGIN 2 */
     I2CInit();
     LCD_Init();
     LCD_Clear(White);
     ledUpdate(ledBuffer);
-    mcp_val = mcpRead();
 
     LCD_DisplayStringLine(Line0, (uint8_t *)"CT117E-M4");
     LCD_DisplayStringLine(Line1, (uint8_t *)"Compiled in");
@@ -153,7 +156,7 @@ int main(void)
         if (sysTime_msFlag & sysTime_msFlag_10ms)
         {
             sysTime_msFlag &= ~sysTime_msFlag_10ms;
-                }
+        }
         if (sysTime_msFlag & sysTime_msFlag_100ms)
         {
             sysTime_msFlag &= ~sysTime_msFlag_100ms;
@@ -164,20 +167,34 @@ int main(void)
             sysTime_msFlag &= ~sysTime_msFlag_1000ms;
 
             adc_getVal();
+
             LCD_ClearLine(Line1);
-            LCD_ClearLine(Line2);
-            LCD_ClearLine(Line3);
-            LCD_ClearLine(Line4);
-            sprintf((char *)dispBuffer, "R37=%.2fV", adcVal_R37);
+            sprintf((char *)dispBuffer, "R37=%.2fV", r37V);
             LCD_DisplayStringLine(Line1, dispBuffer);
-            sprintf((char *)dispBuffer, "R38=%.2fV", adcVal_R38);
+
+            LCD_ClearLine(Line2);
+            sprintf((char *)dispBuffer, "R38=%.2fV", r38V);
             LCD_DisplayStringLine(Line2, dispBuffer);
-            sprintf((char *)dispBuffer, "MCP=%.2fV", adcVal_MCP);
+
+            LCD_ClearLine(Line3);
+            sprintf((char *)dispBuffer, "MCP=%.2fV", mcpV);
             LCD_DisplayStringLine(Line3, dispBuffer);
-            sprintf((char *)dispBuffer, "MCP=%.2fK", MCP_ResVal);
+
+            LCD_ClearLine(Line4);
+            sprintf((char *)dispBuffer, "MCP=%.2fK", mcpR);
             LCD_DisplayStringLine(Line4, dispBuffer);
-            printf("R37=%.2fV,R38=%.2fV,", adcVal_R37, adcVal_R38);
-            printf("MCP=%.2fV,%.2fK\n", adcVal_MCP, MCP_ResVal);
+
+            LCD_ClearLine(Line5);
+            sprintf((char *)dispBuffer, "R39=%uHz", r39Val);
+            LCD_DisplayStringLine(Line5, dispBuffer);
+
+            LCD_ClearLine(Line6);
+            sprintf((char *)dispBuffer, "R40=%uHz", r40Val);
+            LCD_DisplayStringLine(Line6, dispBuffer);
+
+            printf("\n\nR37=%.2fV,R38=%.2fV\n", r37V, r38V);
+            printf("R39=%uHz,R40=%uHz\n", r39Val, r40Val);
+            printf("MCP=%.2fV,%.2fK\n", mcpV, mcpR);
         }
         if (uartRxOKFlag)
         {
@@ -188,7 +205,9 @@ int main(void)
         keyUpdate();
         keyResp();
         ledUpdate(ledBuffer);
-        MCP_ResVal = (0.78740 * mcp_val);
+
+        mcp_res = mcpRead();
+        mcpR = mcp_res * (7.874e-1);
 
         /* USER CODE END WHILE */
 
@@ -247,18 +266,18 @@ void keyResp(void)
     {
     case S3: // Short
 
-        LCD_ClearLine(Line5);
-        LCD_DisplayStringLine(Line5, (uint8_t *)"B1 Short");
+        LCD_ClearLine(Line7);
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B1 Short");
         ledBuffer <<= 1;
-        if (ledBuffer == 0)
-            ledBuffer = 0b1;
+        if (ledBuffer == 0x0)
+            ledBuffer = 0x01;
 
         keyState[0] = S0; // reset state
         break;
 
     case S4: // Long
-        LCD_ClearLine(Line5);
-        LCD_DisplayStringLine(Line5, (uint8_t *)"B1 Long");
+        LCD_ClearLine(Line7);
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B1 Long");
         keyState[0] = S0; // reset state
         break;
 
@@ -270,18 +289,18 @@ void keyResp(void)
     switch (keyState[1])
     {
     case S3: // Short
-        LCD_ClearLine(Line5);
-        LCD_DisplayStringLine(Line5, (uint8_t *)"B2 Short");
+        LCD_ClearLine(Line7);
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B2 Short");
         ledBuffer >>= 1;
-        if (ledBuffer == 0)
-            ledBuffer = 0b10000000;
+        if (ledBuffer == 0x0)
+            ledBuffer = 0x80;
 
         keyState[1] = S0; // reset state
         break;
 
     case S4: // Long
-        LCD_ClearLine(Line5);
-        LCD_DisplayStringLine(Line5, (uint8_t *)"B2 Long");
+        LCD_ClearLine(Line7);
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B2 Long");
         keyState[1] = S0; // reset state
         break;
 
@@ -293,15 +312,15 @@ void keyResp(void)
     switch (keyState[2])
     {
     case S3: // Short
-        LCD_ClearLine(Line5);
-        LCD_DisplayStringLine(Line5, (uint8_t *)"B3 Short");
-        mcpWrite(--mcp_val);
+        LCD_ClearLine(Line7);
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B3 Short");
+        mcpWrite(--mcp_res);
         keyState[2] = S0; // reset state
         break;
 
     case S4: // Long
-        LCD_ClearLine(Line5);
-        LCD_DisplayStringLine(Line5, (uint8_t *)"B3 Long");
+        LCD_ClearLine(Line7);
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B3 Long");
         keyState[2] = S0; // reset state
         break;
 
@@ -313,15 +332,15 @@ void keyResp(void)
     switch (keyState[3])
     {
     case S3: // Short
-        LCD_ClearLine(Line5);
-        LCD_DisplayStringLine(Line5, (uint8_t *)"B4 Short");
-        mcpWrite(++mcp_val);
+        LCD_ClearLine(Line7);
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B4 Short");
+        mcpWrite(++mcp_res);
         keyState[3] = S0; // reset state
         break;
 
     case S4: // Long
-        LCD_ClearLine(Line5);
-        LCD_DisplayStringLine(Line5, (uint8_t *)"B4 Long");
+        LCD_ClearLine(Line7);
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B4 Long");
         keyState[3] = S0; // reset state
         break;
 
@@ -349,16 +368,14 @@ void adc_getVal(void)
     LL_ADC_REG_StartConversion(ADC2);
     while (!LL_ADC_IsActiveFlag_EOC(ADC2))
         ;
-    adcVal_R37 = LL_ADC_REG_ReadConversionData12(ADC2) * 3.3 / 4095;
-
+    r37V = LL_ADC_REG_ReadConversionData12(ADC2) * 3.3 / 4095;
     LL_ADC_REG_StartConversion(ADC1);
     while (!LL_ADC_IsActiveFlag_EOC(ADC1))
         ;
-    adcVal_R38 = LL_ADC_REG_ReadConversionData12(ADC1) * 3.3 / 4095;
-
+    r38V = LL_ADC_REG_ReadConversionData12(ADC1) * 3.3 / 4095;
     while (!LL_ADC_IsActiveFlag_EOC(ADC1))
         ;
-    adcVal_MCP = LL_ADC_REG_ReadConversionData12(ADC1) * 3.3 / 4095;
+    mcpV = LL_ADC_REG_ReadConversionData12(ADC1) * 3.3 / 4095;
 }
 
 inline void msDelay(uint32_t t)
