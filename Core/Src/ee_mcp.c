@@ -121,5 +121,5 @@ void eeWriteP(uint8_t addr, uint8_t *dat, uint8_t n)
         i2c_wack();
     }
     i2c_stop();
-    msDelay(6);
+    HAL_Delay(6);
 }

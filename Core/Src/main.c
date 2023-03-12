@@ -19,10 +19,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
-#include "dac.h"
-#include "gpio.h"
+#include "dma.h"
 #include "tim.h"
 #include "usart.h"
+#include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -39,7 +39,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -50,23 +49,16 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
-volatile uint32_t sysTime = 0;
-volatile uint8_t sysTime_msFlag = 0;
+volatile uint8_t sysTime_msFlag;
+volatile uint32_t sysTime;
 
 extern keyState_enum keyState[keyNum];
-
-uint8_t ledBuffer = 0x0;
+uint8_t ledBuffer = 0x1;
 uint8_t dispBuffer[21];
 
-char uartRxBuffer[uartBufferSize];
-uint8_t uartRxBufferIdx = 0;
-uint8_t uartRxOKFlag = 0;
-
+uint16_t adc1Val[2], adc2Val, r39Val, r40Val;
 float r37V, r38V, mcpV, mcpR;
 uint8_t mcp_res;
-uint16_t r39Val, r40Val;
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -74,8 +66,7 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void keyUpdate(void);
 void keyResp(void);
-void ledUpdate(uint8_t _led);
-
+void ledUpdate(uint8_t led);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -84,52 +75,42 @@ void ledUpdate(uint8_t _led);
 /* USER CODE END 0 */
 
 /**
- * @brief  The application entry point.
- * @retval int
- */
+  * @brief  The application entry point.
+  * @retval int
+  */
 int main(void)
 {
-    /* USER CODE BEGIN 1 */
+  /* USER CODE BEGIN 1 */
 
-    /* USER CODE END 1 */
+  /* USER CODE END 1 */
 
-    /* MCU Configuration--------------------------------------------------------*/
+  /* MCU Configuration--------------------------------------------------------*/
 
-    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
-    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
 
-    /* System interrupt init*/
-    NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_2);
+  /* USER CODE BEGIN Init */
 
-    /** Disable the internal Pull-Up in Dead Battery pins of UCPD peripheral
-     */
-    LL_PWR_DisableUCPDDeadBattery();
+  /* USER CODE END Init */
 
-    /* USER CODE BEGIN Init */
+  /* Configure the system clock */
+  SystemClock_Config();
 
-    /* USER CODE END Init */
+  /* USER CODE BEGIN SysInit */
 
-    /* Configure the system clock */
-    SystemClock_Config();
+  /* USER CODE END SysInit */
 
-    /* USER CODE BEGIN SysInit */
-
-    /* USER CODE END SysInit */
-
-    /* Initialize all configured peripherals */
-    MX_GPIO_Init();
-    MX_TIM2_Init();
-    MX_USART1_UART_Init();
-    MX_TIM7_Init();
-    MX_ADC1_Init();
-    MX_ADC2_Init();
-    MX_TIM17_Init();
-    MX_DAC1_Init();
-    MX_TIM3_Init();
-    /* USER CODE BEGIN 2 */
-    I2CInit();
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_DMA_Init();
+  MX_TIM2_Init();
+  MX_USART1_UART_Init();
+  MX_ADC1_Init();
+  MX_ADC2_Init();
+  MX_TIM3_Init();
+  /* USER CODE BEGIN 2 */
     LCD_Init();
+    I2CInit();
     LCD_Clear(White);
     ledUpdate(ledBuffer);
 
@@ -138,36 +119,26 @@ int main(void)
     sprintf((char *)dispBuffer, "%s,%s", __TIME__, __DATE__);
     LCD_DisplayStringLine(Line2, dispBuffer);
     printf("%s\n%s\n%s\n", "CT117E-M4", "Compiled in", dispBuffer);
-    LL_mDelay(1000);
+    HAL_Delay(1000);
     LCD_ClearLine(Line1);
     LCD_ClearLine(Line2);
-    printf("Init OK\n");
-    /* USER CODE END 2 */
 
-    /* Infinite loop */
-    /* USER CODE BEGIN WHILE */
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1Val, 2);
+    HAL_ADC_Start_DMA(&hadc2, (uint32_t *)&adc2Val, 1);
+    HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
+    HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
+
+    printf("Init OK\n");
+
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
     while (1)
     {
-        if (sysTime_msFlag & sysTime_msFlag_5ms)
+        if (sysTime_msFlag)
         {
-            sysTime_msFlag &= ~sysTime_msFlag_5ms;
-        }
-
-        if (sysTime_msFlag & sysTime_msFlag_10ms)
-        {
-            sysTime_msFlag &= ~sysTime_msFlag_10ms;
-        }
-        if (sysTime_msFlag & sysTime_msFlag_100ms)
-        {
-            sysTime_msFlag &= ~sysTime_msFlag_100ms;
-        }
-
-        if (sysTime_msFlag & sysTime_msFlag_1000ms)
-        {
-            sysTime_msFlag &= ~sysTime_msFlag_1000ms;
-
-            adc_getVal();
-
+            sysTime_msFlag = 0;
             LCD_ClearLine(Line1);
             sprintf((char *)dispBuffer, "R37=%.2fV", r37V);
             LCD_DisplayStringLine(Line1, dispBuffer);
@@ -196,69 +167,67 @@ int main(void)
             printf("R39=%uHz,R40=%uHz\n", r39Val, r40Val);
             printf("MCP=%.2fV,%.2fK\n", mcpV, mcpR);
         }
-        if (uartRxOKFlag)
-        {
-            uartRxOKFlag = 0;
-            printf("%s", uartRxBuffer);
-        }
+    /* USER CODE END WHILE */
 
+    /* USER CODE BEGIN 3 */
         keyUpdate();
         keyResp();
         ledUpdate(ledBuffer);
-
         mcp_res = mcpRead();
         mcpR = mcp_res * (7.874e-1);
-
-        /* USER CODE END WHILE */
-
-        /* USER CODE BEGIN 3 */
+        r37V = adc2Val * 3.3 / 4095;
+        r38V = adc1Val[0] * 3.3 / 4095;
+        mcpV = adc1Val[1] * 3.3 / 4095;
     }
-    /* USER CODE END 3 */
+  /* USER CODE END 3 */
 }
 
 /**
- * @brief System Clock Configuration
- * @retval None
- */
+  * @brief System Clock Configuration
+  * @retval None
+  */
 void SystemClock_Config(void)
 {
-    LL_FLASH_SetLatency(LL_FLASH_LATENCY_2);
-    while (LL_FLASH_GetLatency() != LL_FLASH_LATENCY_2)
-    {
-    }
-    LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE1);
-    LL_RCC_HSE_Enable();
-    /* Wait till HSE is ready */
-    while (LL_RCC_HSE_IsReady() != 1)
-    {
-    }
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-    LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_3, 20, LL_RCC_PLLR_DIV_2);
-    LL_RCC_PLL_EnableDomain_SYS();
-    LL_RCC_PLL_Enable();
-    /* Wait till PLL is ready */
-    while (LL_RCC_PLL_IsReady() != 1)
-    {
-    }
+  /** Configure the main internal regulator output voltage
+  */
+  HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-    /* Wait till System clock is ready */
-    while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
-    {
-    }
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV3;
+  RCC_OscInitStruct.PLL.PLLN = 20;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
+  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
-    /* Set AHB prescaler*/
-    LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
-    LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
-    LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_1);
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-    LL_Init1msTick(80000000);
-
-    LL_SetSystemCoreClock(80000000);
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /* USER CODE BEGIN 4 */
-
 void keyResp(void)
 {
     /* B1 */
@@ -349,70 +318,60 @@ void keyResp(void)
     }
 }
 
-void uart_ReceiveIRQ(void)
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
-    uint8_t ch = LL_USART_ReceiveData8(USART1);
-
-    if (ch == (uint8_t)('\r'))
+    uint32_t timVal = 0;
+    if (htim->Instance == TIM2)
     {
-        uartRxBuffer[uartRxBufferIdx] = 0;
-        uartRxBufferIdx = 0;
-        uartRxOKFlag = 1;
+        timVal = __HAL_TIM_GET_COUNTER(&htim2);
+        __HAL_TIM_SetCounter(&htim2, 0);
+        r39Val = 1000000 / timVal;
+        HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
     }
-    else
-        uartRxBuffer[uartRxBufferIdx++] = ch;
+    if (htim->Instance == TIM3)
+    {
+        timVal = __HAL_TIM_GET_COUNTER(&htim3);
+        __HAL_TIM_SetCounter(&htim3, 0);
+        r40Val = 1000000 / timVal;
+        HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
+    }
 }
 
-void adc_getVal(void)
+int fputc(int ch, FILE *f)
 {
-    LL_ADC_REG_StartConversion(ADC2);
-    while (!LL_ADC_IsActiveFlag_EOC(ADC2))
-        ;
-    r37V = LL_ADC_REG_ReadConversionData12(ADC2) * 3.3 / 4095;
-    LL_ADC_REG_StartConversion(ADC1);
-    while (!LL_ADC_IsActiveFlag_EOC(ADC1))
-        ;
-    r38V = LL_ADC_REG_ReadConversionData12(ADC1) * 3.3 / 4095;
-    while (!LL_ADC_IsActiveFlag_EOC(ADC1))
-        ;
-    mcpV = LL_ADC_REG_ReadConversionData12(ADC1) * 3.3 / 4095;
+    HAL_UART_Transmit(&huart1,(uint8_t*)&ch,1,0xffff);
+    return ch;
 }
-
-inline void msDelay(uint32_t t)
-{
-    LL_mDelay(t);
-}
-
 /* USER CODE END 4 */
 
 /**
- * @brief  This function is executed in case of error occurrence.
- * @retval None
- */
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
 void Error_Handler(void)
 {
-    /* USER CODE BEGIN Error_Handler_Debug */
+  /* USER CODE BEGIN Error_Handler_Debug */
     /* User can add his own implementation to report the HAL error return state */
     __disable_irq();
     while (1)
     {
     }
-    /* USER CODE END Error_Handler_Debug */
+  /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef USE_FULL_ASSERT
+#ifdef  USE_FULL_ASSERT
 /**
- * @brief  Reports the name of the source file and the source line number
- *         where the assert_param error has occurred.
- * @param  file: pointer to the source file name
- * @param  line: assert_param error line source number
- * @retval None
- */
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-    /* USER CODE BEGIN 6 */
+  /* USER CODE BEGIN 6 */
     /* User can add his own implementation to report the file name and line number,
        ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-    /* USER CODE END 6 */
+  /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

@@ -84,19 +84,19 @@ void REG_932X_Init(void)
 	LCD_WriteReg(R18 , 0x0000); // VREG1OUT voltage
 	LCD_WriteReg(R19 , 0x0000);   // VDV[4:0] for VCOM amplitude
 //	Delay_Ms(200);                    // Delay 200 MS , Dis-charge capacitor power voltage
-	LL_mDelay(200);
+	HAL_Delay(200);
 	LCD_WriteReg(R16 , 0x1690);   // SAP, BT[3:0], AP, DSTB, SLP, STB
 	LCD_WriteReg(R17 , 0x0227); // R11H=0x0221 at VCI=3.3V, DC1[2:0], DC0[2:0], VC[2:0]
 //	Delay_Ms(50);      // Delay 50ms
-	LL_mDelay(50);
+	HAL_Delay(50);
 	LCD_WriteReg(R18 , 0x001D); // External reference voltage= Vci;
 //	Delay_Ms(50);      // Delay 50ms
-	LL_mDelay(50);
+	HAL_Delay(50);
 	LCD_WriteReg(R19 , 0x0800); // R13H=1D00 when R12H=009D;VDV[4:0] for VCOM amplitude
 	LCD_WriteReg(R41 , 0x0014); // R29H=0013 when R12H=009D;VCM[5:0] for VCOMH
 	LCD_WriteReg(R43 , 0x000B);   // Frame Rate = 96Hz
 //	Delay_Ms(50);      // Delay 50ms
-	LL_mDelay(50);
+	HAL_Delay(50);
 	LCD_WriteReg(R32 , 0x0000); // GRAM horizontal Address
 	LCD_WriteReg(R33 , 0x0000); // GRAM Vertical Address
 	/* ----------- Adjust the Gamma Curve ---------- */
@@ -535,25 +535,25 @@ void LCD_WriteBMP(u32 BmpAddress)
 *******************************************************************************/
 void LCD_WriteReg(u8 LCD_Reg, u16 LCD_RegValue)
 {
-	GPIOB->BRR  |= LL_GPIO_PIN_9;  	
-	GPIOB->BRR  |= LL_GPIO_PIN_8;  	
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 	
+	GPIOB->BRR  |= GPIO_PIN_9;  	
+	GPIOB->BRR  |= GPIO_PIN_8;  	
+	GPIOB->BSRR |= GPIO_PIN_5; 	
 	
 	GPIOC->ODR = LCD_Reg; 
-	GPIOB->BRR  |= LL_GPIO_PIN_5; 
+	GPIOB->BRR  |= GPIO_PIN_5; 
 	__nop();
 	__nop();
 	__nop();	
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
-	GPIOB->BSRR |= LL_GPIO_PIN_8; 
+	GPIOB->BSRR |= GPIO_PIN_5; 
+	GPIOB->BSRR |= GPIO_PIN_8; 
 
 	GPIOC->ODR = LCD_RegValue; 
-	GPIOB->BRR  |= LL_GPIO_PIN_5; 
+	GPIOB->BRR  |= GPIO_PIN_5; 
 	__nop();
 	__nop();
 	__nop();  
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
-	GPIOB->BSRR |= LL_GPIO_PIN_8; 
+	GPIOB->BSRR |= GPIO_PIN_5; 
+	GPIOB->BSRR |= GPIO_PIN_8; 
 }
 /*******************************************************************************
 * Function Name  : LCD_ReadReg
@@ -566,28 +566,28 @@ u16 LCD_ReadReg(u8 LCD_Reg)
 {
 	u16 temp;
 
-	GPIOB->BRR |= LL_GPIO_PIN_9;  
-	GPIOB->BRR |= LL_GPIO_PIN_8;  
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
+	GPIOB->BRR |= GPIO_PIN_9;  
+	GPIOB->BRR |= GPIO_PIN_8;  
+	GPIOB->BSRR |= GPIO_PIN_5; 
 
 	GPIOC->ODR = LCD_Reg; 
-	GPIOB->BRR |= LL_GPIO_PIN_5; 
+	GPIOB->BRR |= GPIO_PIN_5; 
 	__nop();
 	__nop();
 	__nop();
-	GPIOB->BSRR |= LL_GPIO_PIN_5;
-	GPIOB->BSRR |= LL_GPIO_PIN_8;
+	GPIOB->BSRR |= GPIO_PIN_5;
+	GPIOB->BSRR |= GPIO_PIN_8;
 
 	LCD_BusIn();
-	GPIOA->BRR |= LL_GPIO_PIN_8;	
+	GPIOA->BRR |= GPIO_PIN_8;	
 	__nop();
 	__nop();
 	__nop();
 	temp = GPIOC->IDR;    
-	GPIOA->BSRR |= LL_GPIO_PIN_8;
+	GPIOA->BSRR |= GPIO_PIN_8;
 
 	LCD_BusOut();
-	GPIOB->BSRR |= LL_GPIO_PIN_9; 
+	GPIOB->BSRR |= GPIO_PIN_9; 
 
 	return temp;
 }
@@ -600,21 +600,21 @@ u16 LCD_ReadReg(u8 LCD_Reg)
 *******************************************************************************/
 void LCD_WriteRAM_Prepare(void)
 { 
-	GPIOB->BRR  |= LL_GPIO_PIN_9;  
-	GPIOB->BRR  |= LL_GPIO_PIN_8; 
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
+	GPIOB->BRR  |=  GPIO_PIN_9;  
+	GPIOB->BRR  |=  GPIO_PIN_8; 
+	GPIOB->BSRR |=  GPIO_PIN_5; 
 
 	GPIOC->ODR = R34;     
-	GPIOB->BRR  |= LL_GPIO_PIN_5; 
+	GPIOB->BRR  |=  GPIO_PIN_5; 
 	__nop();
 	__nop();
 	__nop();    
-	GPIOB->BSRR |= LL_GPIO_PIN_5;
-	GPIOB->BSRR |= LL_GPIO_PIN_8; 
+	GPIOB->BSRR |=  GPIO_PIN_5;
+	GPIOB->BSRR |=  GPIO_PIN_8; 
 	__nop();
 	__nop();
 	__nop();  
-	GPIOB->BSRR |= LL_GPIO_PIN_9; 
+	GPIOB->BSRR |=  GPIO_PIN_9; 
 }
 /*******************************************************************************
 * Function Name  : LCD_WriteRAM
@@ -625,21 +625,21 @@ void LCD_WriteRAM_Prepare(void)
 *******************************************************************************/
 void LCD_WriteRAM(u16 RGB_Code)
 {
-	GPIOB->BRR  |= LL_GPIO_PIN_9;  
-	GPIOB->BSRR |= LL_GPIO_PIN_8; 
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
+	GPIOB->BRR  |=  GPIO_PIN_9;  
+	GPIOB->BSRR |=  GPIO_PIN_8; 
+	GPIOB->BSRR |=  GPIO_PIN_5; 
 
 	GPIOC->ODR = RGB_Code;
-	GPIOB->BRR  |= LL_GPIO_PIN_5;
+	GPIOB->BRR  |=  GPIO_PIN_5;
 	__nop();
 	__nop();
 	__nop();  
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
-	GPIOB->BSRR |= LL_GPIO_PIN_8; 
+	GPIOB->BSRR |=  GPIO_PIN_5; 
+	GPIOB->BSRR |=  GPIO_PIN_8; 
 	__nop();
 	__nop();
 	__nop();
-	GPIOB->BSRR |= LL_GPIO_PIN_9; 
+	GPIOB->BSRR |=  GPIO_PIN_9; 
 }
 /*******************************************************************************
 * Function Name  : LCD_ReadRAM
@@ -652,28 +652,28 @@ u16 LCD_ReadRAM(void)
 {
 	u16 temp;
 
-	GPIOB->BRR  |= LL_GPIO_PIN_9; 
-	GPIOB->BRR  |= LL_GPIO_PIN_8; 
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
+	GPIOB->BRR  |=  GPIO_PIN_9; 
+	GPIOB->BRR  |=  GPIO_PIN_8; 
+	GPIOB->BSRR |=  GPIO_PIN_5; 
 
 	GPIOC->ODR = R34;     
-	GPIOB->BRR  |= LL_GPIO_PIN_5;  
+	GPIOB->BRR  |=  GPIO_PIN_5;  
 	__nop();
 	__nop();
 	__nop();  
-	GPIOB->BSRR |= LL_GPIO_PIN_5; 
-	GPIOB->BSRR |= LL_GPIO_PIN_8; 
+	GPIOB->BSRR |=  GPIO_PIN_5; 
+	GPIOB->BSRR |=  GPIO_PIN_8; 
 
 	LCD_BusIn();
-	GPIOA->BRR |= LL_GPIO_PIN_8;
+	GPIOA->BRR |=  GPIO_PIN_8;
 	__nop();
 	__nop();
 	__nop();  	
 	temp = GPIOC->IDR;  
-	GPIOA->BSRR |= LL_GPIO_PIN_8;	
+	GPIOA->BSRR |=  GPIO_PIN_8;	
 	
 	LCD_BusOut();
-	GPIOB->BSRR |= LL_GPIO_PIN_9; 
+	GPIOB->BSRR |=  GPIO_PIN_9; 
                          
 	return temp;
 }
@@ -733,27 +733,23 @@ void LCD_DisplayOff(void)
 *******************************************************************************/
 void LCD_CtrlLinesConfig(void)
 {
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+	
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+	
+	GPIO_InitStruct.Pin = GPIO_PIN_5 | GPIO_PIN_8 | GPIO_PIN_9;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct); 
 
-	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-  /* GPIO Ports Clock Enable */
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
-  LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);	
-		
-	GPIO_InitStruct.Pin = LL_GPIO_PIN_5|LL_GPIO_PIN_8|LL_GPIO_PIN_9;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  LL_GPIO_Init(GPIOB, &GPIO_InitStruct); 
-
-	GPIO_InitStruct.Pin = LL_GPIO_PIN_8;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  LL_GPIO_Init(GPIOA, &GPIO_InitStruct); 
+	GPIO_InitStruct.Pin =  GPIO_PIN_8 ;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct); 
 
 	LCD_BusOut();
 
@@ -770,13 +766,13 @@ void LCD_CtrlLinesConfig(void)
 *******************************************************************************/
 void LCD_BusIn(void)
 {	
-	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
 	
-	GPIO_InitStruct.Pin = LL_GPIO_PIN_ALL;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
-  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  LL_GPIO_Init(GPIOC, &GPIO_InitStruct); 		
+	GPIO_InitStruct.Pin = GPIO_PIN_All;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct); 		
 }
 
 /*******************************************************************************
@@ -788,14 +784,13 @@ void LCD_BusIn(void)
 *******************************************************************************/
 void LCD_BusOut(void)
 {
-	LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
 	
-	GPIO_InitStruct.Pin = LL_GPIO_PIN_ALL;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
-  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  LL_GPIO_Init(GPIOC, &GPIO_InitStruct); 	
+	GPIO_InitStruct.Pin = GPIO_PIN_All;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct); 	
 }
 
 /*******************************************************************************

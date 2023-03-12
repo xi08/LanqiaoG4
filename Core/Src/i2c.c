@@ -10,13 +10,13 @@
   */
 void SDA_Input_Mode()
 {
-    LL_GPIO_InitTypeDef GPIO_InitStructure = {0};
+    GPIO_InitTypeDef GPIO_InitStructure = {0};
 
-    GPIO_InitStructure.Pin = LL_GPIO_PIN_7;
-    GPIO_InitStructure.Mode = LL_GPIO_MODE_INPUT;
-    GPIO_InitStructure.Pull = LL_GPIO_PULL_UP;
-    GPIO_InitStructure.Speed = LL_GPIO_SPEED_FAST;
-    LL_GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIO_InitStructure.Pin = GPIO_PIN_7;
+    GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStructure.Pull = GPIO_PULLUP;
+    GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 
 /**
@@ -26,14 +26,13 @@ void SDA_Input_Mode()
   */
 void SDA_Output_Mode()
 {
-    LL_GPIO_InitTypeDef GPIO_InitStructure = {0};
+    GPIO_InitTypeDef GPIO_InitStructure = {0};
 
-    GPIO_InitStructure.Pin = LL_GPIO_PIN_7;
-    GPIO_InitStructure.Mode = LL_GPIO_MODE_OUTPUT;
-		GPIO_InitStructure.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
-    GPIO_InitStructure.Pull = LL_GPIO_PULL_NO;
-    GPIO_InitStructure.Speed = LL_GPIO_SPEED_FAST;
-    LL_GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIO_InitStructure.Pin = GPIO_PIN_7;
+    GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_OD;
+    GPIO_InitStructure.Pull = GPIO_NOPULL;
+    GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 
 /**
@@ -45,11 +44,11 @@ void SDA_Output( uint16_t val )
 {
     if ( val )
     {
-        GPIOB->BSRR |= LL_GPIO_PIN_7;
+        GPIOB->BSRR |= GPIO_PIN_7;
     }
     else
     {
-        GPIOB->BRR |= LL_GPIO_PIN_7;
+        GPIOB->BRR |= GPIO_PIN_7;
     }
 }
 
@@ -62,11 +61,11 @@ void SCL_Output( uint16_t val )
 {
     if ( val )
     {
-        GPIOB->BSRR |= LL_GPIO_PIN_6;
+        GPIOB->BSRR |= GPIO_PIN_6;
     }
     else
     {
-        GPIOB->BRR |= LL_GPIO_PIN_6;
+        GPIOB->BRR |= GPIO_PIN_6;
     }
 }
 
@@ -77,7 +76,7 @@ void SCL_Output( uint16_t val )
   */
 uint8_t SDA_Input(void)
 {
-	if(LL_GPIO_IsInputPinSet(GPIOB, LL_GPIO_PIN_7)){
+	if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_7) == GPIO_PIN_SET){
 		return 1;
 	}else{
 		return 0;
@@ -246,13 +245,11 @@ unsigned char I2CReceiveByte(void)
 //
 void I2CInit(void)
 {
-	LL_GPIO_InitTypeDef GPIO_Initure;
-	
-	LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
-	
-	GPIO_Initure.Pin = LL_GPIO_PIN_6 | LL_GPIO_PIN_7;
-	GPIO_Initure.Mode = LL_GPIO_MODE_OUTPUT;
-	GPIO_Initure.Pull = LL_GPIO_PULL_UP;
-	GPIO_Initure.Speed = LL_GPIO_SPEED_FAST;
-	LL_GPIO_Init(GPIOB, &GPIO_Initure);	
+		GPIO_InitTypeDef GPIO_InitStructure = {0};
+
+    GPIO_InitStructure.Pin = GPIO_PIN_7 | GPIO_PIN_6;
+    GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStructure.Pull = GPIO_PULLUP;
+    GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
