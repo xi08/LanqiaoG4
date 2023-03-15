@@ -4,13 +4,15 @@
 
 基于CT117E-M4平台，STM32G431RBT6芯片
 
-使用STM32Cube FW_G4 V1.5.1
-
 ## 开发与下载环境
 
 MDK-ARM V5.32+
 
+ARMCC V5.06 update7 (build 960)
+
 STM32CubeMX V6.7.0+
+
+STM32Cube FW_G4 V1.5.1
 
 ## 实现功能
 
