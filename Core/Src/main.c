@@ -63,6 +63,8 @@ uint16_t adc1Val[2], adc2Val, r39Val, r40Val;
 float r37V, r38V, mcpV, mcpR;
 uint8_t mcp_res;
 
+uint8_t uart1Buffer[256];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -71,6 +73,7 @@ void SystemClock_Config(void);
 void keyUpdate(void);
 void keyResp(void);
 void ledUpdate(uint8_t led);
+void uartRespRX(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -153,6 +156,8 @@ int main(void)
 
     HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc1Val, 2);
     HAL_ADC_Start_DMA(&hadc2, (uint32_t *)&adc2Val, 1);
+
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart1, uart1Buffer, (sizeof(uart1Buffer) - 1));
 
     HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
     HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
@@ -372,22 +377,38 @@ void keyResp(void)
     }
 }
 
+void uartRespRX(void)
+{
+    LCD_ClearLine(Line8);
+    LCD_DisplayStringLine(Line8, uart1Buffer);
+    printf("%s", uart1Buffer);
+}
+
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
     uint32_t timVal = 0;
     if (htim->Instance == TIM2)
     {
         timVal = __HAL_TIM_GET_COUNTER(&htim2);
+        r40Val = 1000000 / timVal;
         __HAL_TIM_SetCounter(&htim2, 0);
-        r39Val = 1000000 / timVal;
         HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
     }
     if (htim->Instance == TIM3)
     {
         timVal = __HAL_TIM_GET_COUNTER(&htim3);
+        r39Val = 1000000 / timVal;
         __HAL_TIM_SetCounter(&htim3, 0);
-        r40Val = 1000000 / timVal;
         HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
+    }
+}
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+{
+    if (huart->Instance == USART1)
+    {
+        uartRespRX();
+        memset(uart1Buffer, 0, sizeof(uart1Buffer));
+        HAL_UARTEx_ReceiveToIdle_DMA(&huart1, uart1Buffer, (sizeof(uart1Buffer) - 1));
     }
 }
 
