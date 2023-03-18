@@ -73,6 +73,8 @@ extern volatile uint32_t sysTime;
 #define LD8_GPIO_Port GPIOC
 #define B4_Pin GPIO_PIN_0
 #define B4_GPIO_Port GPIOA
+#define PWM1_Pin GPIO_PIN_1
+#define PWM1_GPIO_Port GPIOA
 #define B1_Pin GPIO_PIN_0
 #define B1_GPIO_Port GPIOB
 #define B2_Pin GPIO_PIN_1

@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
+#include "dac.h"
 #include "dma.h"
 #include "gpio.h"
 #include "tim.h"
@@ -59,9 +60,11 @@ extern keyState_enum keyState[keyNum];
 uint8_t ledBuffer = 0x1;
 uint8_t dispBuffer[21];
 
-uint16_t adc1Val[2], adc2Val, r39Val, r40Val;
+uint16_t adc1Val[2], adc2Val, r39Val, r40Val, dacVal;
 float r37V, r38V, mcpV, mcpR;
 uint8_t mcp_res;
+
+float pwmF, pwmD;
 
 uint8_t uart1Buffer[256];
 
@@ -110,11 +113,13 @@ int main(void)
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
     MX_DMA_Init();
-    MX_TIM2_Init();
     MX_USART1_UART_Init();
     MX_ADC1_Init();
     MX_ADC2_Init();
     MX_TIM3_Init();
+    MX_DAC1_Init();
+    MX_TIM8_Init();
+    MX_TIM2_Init();
     /* USER CODE BEGIN 2 */
     LCD_Init();
     LCD_Clear(White);
@@ -143,6 +148,8 @@ int main(void)
     mcp_res = mcpRead();
     mcpR = mcp_res * 0.7874;
 
+    // dacVal = eeRead(0x01);
+
     sprintf((char *)dispBuffer, "%s  Boot=%u", "CT117E-M4", bootTime[0]);
     LCD_DisplayStringLine(Line0, dispBuffer);
     printf("%s\n", dispBuffer);
@@ -159,8 +166,12 @@ int main(void)
 
     HAL_UARTEx_ReceiveToIdle_DMA(&huart1, uart1Buffer, (sizeof(uart1Buffer) - 1));
 
-    HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
+    HAL_TIM_IC_Start_IT(&htim8, TIM_CHANNEL_1);
     HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
+
+    HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dacVal);
+
+    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
 
     printf("Init OK\n");
 
@@ -174,36 +185,37 @@ int main(void)
         r38V = adc1Val[0] * 3.3 / 4095;
         mcpV = adc1Val[1] * 3.3 / 4095;
 
+        (htim2.Instance->ARR) = r39Val * 0.01 + r40Val;
+        (htim2.Instance->CCR2) = (adc1Val[0] * 1.0 / 4095 * (htim2.Instance->ARR + 1)) - 1;
+        dacVal = adc2Val;
+
         if (sysTime_msFlag)
         {
             sysTime_msFlag = 0;
+            printf("\n");
+
             LCD_ClearLine(Line1);
-            sprintf((char *)dispBuffer, "R37=%.2fV", r37V);
-            LCD_DisplayStringLine(Line1, dispBuffer);
+            sprintf((char *)dispBuffer, "A1=%.2fV,F1=%uHz", r37V, r39Val);
+            LCD_DisplayStringLine(Line1, dispBuffer), printf("%s\n", dispBuffer);
 
             LCD_ClearLine(Line2);
-            sprintf((char *)dispBuffer, "R38=%.2fV", r38V);
-            LCD_DisplayStringLine(Line2, dispBuffer);
+            sprintf((char *)dispBuffer, "A2=%.2fV,F2=%uHz", r38V, r40Val);
+            LCD_DisplayStringLine(Line2, dispBuffer), printf("%s\n", dispBuffer);
 
             LCD_ClearLine(Line3);
-            sprintf((char *)dispBuffer, "MCP=%.2fV", mcpV);
-            LCD_DisplayStringLine(Line3, dispBuffer);
-
             LCD_ClearLine(Line4);
-            sprintf((char *)dispBuffer, "MCP=%.2fK", mcpR);
-            LCD_DisplayStringLine(Line4, dispBuffer);
+            sprintf((char *)dispBuffer, "PA1/F=%.2fHz", pwmF);
+            LCD_DisplayStringLine(Line3, dispBuffer), printf("%s\n", dispBuffer);
+            sprintf((char *)dispBuffer, "PA1/D=%.2f%%", pwmD);
+            LCD_DisplayStringLine(Line4, dispBuffer), printf("%s\n", dispBuffer);
 
             LCD_ClearLine(Line5);
-            sprintf((char *)dispBuffer, "R39=%uHz", r39Val);
-            LCD_DisplayStringLine(Line5, dispBuffer);
+            sprintf((char *)dispBuffer, "PA4=%.2fV", (dacVal * 3.3 / 4095));
+            LCD_DisplayStringLine(Line5, dispBuffer), printf("%s\n", dispBuffer);
 
             LCD_ClearLine(Line6);
-            sprintf((char *)dispBuffer, "R40=%uHz", r40Val);
-            LCD_DisplayStringLine(Line6, dispBuffer);
-
-            printf("\n\nR37=%.2fV,R38=%.2fV\n", r37V, r38V);
-            printf("R39=%uHz,R40=%uHz\n", r39Val, r40Val);
-            printf("MCP=%.2fV,%.2fK\n", mcpV, mcpR);
+            sprintf((char *)dispBuffer, "Res=%.2fV,%.2fK", mcpV, mcpR);
+            LCD_DisplayStringLine(Line6, dispBuffer), printf("%s\n", dispBuffer);
         }
         /* USER CODE END WHILE */
 
@@ -216,6 +228,11 @@ int main(void)
 
         mcp_res = mcpRead();
         mcpR = mcp_res * (7.874e-1);
+
+        pwmD = 100.0 * (htim2.Instance->CCR2 + 1) / (htim2.Instance->ARR + 1);
+        pwmF = 80e6 / (htim2.Instance->ARR + 1) / (htim2.Instance->PSC + 1);
+
+        HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dacVal);
     }
     /* USER CODE END 3 */
 }
@@ -267,113 +284,123 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void keyResp(void)
 {
-    /* B1 */
-    switch (keyState[0])
-    {
-    case S3: // Short
 
+    /* B1s */
+    if (keyState[0] == S3)
+    {
+        // disp.
         LCD_ClearLine(Line7);
-        LCD_DisplayStringLine(Line7, (uint8_t *)"B1 Short");
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B1s");
+
         // act.
         ledBuffer <<= 1;
         if (ledBuffer == 0x0)
             ledBuffer = 0x01;
 
-        keyState[0] = S0; // reset state
-        break;
+        // reset state
+        keyState[0] = S0;
+    }
 
-    case S4: // Long
+    /* B1l */
+    if (keyState[0] == S4)
+    {
+        // disp.
         LCD_ClearLine(Line7);
-        LCD_DisplayStringLine(Line7, (uint8_t *)"B1 Long");
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B1l");
+
         // act.
         ledBuffer = 0x00;
 
-        keyState[0] = S0; // reset state
-        break;
-
-    default:
-        break;
+        // reset state
+        keyState[1] = S0;
     }
 
-    /* B2 */
-    switch (keyState[1])
+    /* B2s */
+    if (keyState[1] == S3)
     {
-    case S3: // Short
+        // disp.
         LCD_ClearLine(Line7);
-        LCD_DisplayStringLine(Line7, (uint8_t *)"B2 Short");
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B2s");
+
         // act.
         ledBuffer >>= 1;
         if (ledBuffer == 0x0)
             ledBuffer = 0x80;
 
-        keyState[1] = S0; // reset state
-        break;
+        // reset state
+        keyState[0] = S0;
+    }
 
-    case S4: // Long
+    /* B2l */
+    if (keyState[1] == S4)
+    {
+        // disp.
         LCD_ClearLine(Line7);
-        LCD_DisplayStringLine(Line7, (uint8_t *)"B2 Long");
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B2l");
 
         // act.
         ledBuffer = 0xff;
 
-        keyState[1] = S0; // reset state
-
-        break;
-
-    default:
-        break;
+        // reset state
+        keyState[1] = S0;
     }
 
-    /* B3 */
-    switch (keyState[2])
+    /* B3s */
+    if (keyState[2] == S3)
     {
-    case S3: // Short
+        // disp.
         LCD_ClearLine(Line7);
-        LCD_DisplayStringLine(Line7, (uint8_t *)"B3 Short");
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B3s");
+
         // act.
         mcpWrite(--mcp_res);
 
-        keyState[2] = S0; // reset state
-        break;
+        // reset state
+        keyState[2] = S0;
+    }
 
-    case S4: // Long
+    /* B3l */
+    if (keyState[2] == S4)
+    {
+        // disp.
         LCD_ClearLine(Line7);
-        LCD_DisplayStringLine(Line7, (uint8_t *)"B3 Long");
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B3l");
+
         // act.
         mcp_res = 0;
         mcpWrite(mcp_res);
 
-        keyState[2] = S0; // reset state
-        break;
-
-    default:
-        break;
+        // reset state
+        keyState[2] = S0;
     }
 
-    /* B4 */
-    switch (keyState[3])
+    /* B4s */
+    if (keyState[3] == S3)
     {
-    case S3: // Short
+        // disp.
         LCD_ClearLine(Line7);
-        LCD_DisplayStringLine(Line7, (uint8_t *)"B4 Short");
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B4s");
+
         // act.
         mcpWrite(++mcp_res);
 
-        keyState[3] = S0; // reset state
-        break;
+        // reset state
+        keyState[3] = S0;
+    }
 
-    case S4: // Long
+    /* B4l */
+    if (keyState[3] == S4)
+    {
+        // disp.
         LCD_ClearLine(Line7);
-        LCD_DisplayStringLine(Line7, (uint8_t *)"B4 Long");
+        LCD_DisplayStringLine(Line7, (uint8_t *)"B4l");
+
         // act.
         mcp_res = 0x7f;
         mcpWrite(mcp_res);
 
-        keyState[3] = S0; // reset state
-        break;
-
-    default:
-        break;
+        // reset state
+        keyState[3] = S0;
     }
 }
 
@@ -386,19 +413,19 @@ void uartRespRX(void)
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
-    uint32_t timVal = 0;
-    if (htim->Instance == TIM2)
+    uint32_t timVal;
+    if (htim->Instance == TIM8)
     {
-        timVal = __HAL_TIM_GET_COUNTER(&htim2);
-        r40Val = 1000000 / timVal;
-        __HAL_TIM_SetCounter(&htim2, 0);
-        HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
+        timVal = __HAL_TIM_GET_COUNTER(&htim8);
+        r40Val = ((uint32_t)1e6) / timVal;
+        __HAL_TIM_SET_COUNTER(&htim8, 0);
+        HAL_TIM_IC_Start_IT(&htim8, TIM_CHANNEL_1);
     }
     if (htim->Instance == TIM3)
     {
         timVal = __HAL_TIM_GET_COUNTER(&htim3);
-        r39Val = 1000000 / timVal;
-        __HAL_TIM_SetCounter(&htim3, 0);
+        r39Val = ((uint32_t)1e6) / timVal;
+        __HAL_TIM_SET_COUNTER(&htim3, 0);
         HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
     }
 }
