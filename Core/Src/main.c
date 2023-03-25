@@ -60,11 +60,11 @@ extern keyState_enum keyState[keyNum];
 uint8_t ledBuffer = 0x1;
 uint8_t dispBuffer[21];
 
-uint16_t adc1Val[2], adc2Val, r39Val, r40Val, dacVal;
+uint16_t adc1Val[2], adc2Val, dacVal, r39Freq, r40Freq;
 float r37V, r38V, mcpV, mcpR;
 uint8_t mcp_res;
-
-float pwmF, pwmD;
+float pwmO[2], pwmC[2];
+uint32_t pwm16_div;
 
 uint8_t uart1Buffer[256];
 
@@ -77,6 +77,7 @@ void keyUpdate(void);
 void keyResp(void);
 void ledUpdate(uint8_t led);
 void uartRespRX(void);
+uint32_t getTimeBase(TIM_HandleTypeDef *htim);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -120,6 +121,8 @@ int main(void)
     MX_DAC1_Init();
     MX_TIM8_Init();
     MX_TIM2_Init();
+    MX_TIM4_Init();
+    MX_TIM16_Init();
     /* USER CODE BEGIN 2 */
     LCD_Init();
     LCD_Clear(White);
@@ -169,9 +172,14 @@ int main(void)
     HAL_TIM_IC_Start_IT(&htim8, TIM_CHANNEL_1);
     HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
 
+    HAL_TIM_IC_Start_IT(&htim4, TIM_CHANNEL_1);
+    HAL_TIM_IC_Start_IT(&htim4, TIM_CHANNEL_2);
+
     HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dacVal);
 
     HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+
+    HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1);
 
     printf("Init OK\n");
 
@@ -184,29 +192,30 @@ int main(void)
         r37V = adc2Val * 3.3 / 4095;
         r38V = adc1Val[0] * 3.3 / 4095;
         mcpV = adc1Val[1] * 3.3 / 4095;
+        dacVal = adc1Val[0];
 
-        (htim2.Instance->ARR) = r39Val * 0.01 + r40Val;
-        (htim2.Instance->CCR2) = (adc1Val[0] * 1.0 / 4095 * (htim2.Instance->ARR + 1)) - 1;
-        dacVal = adc2Val;
+        htim16.Instance->ARR = (r37V * 15000 + 8001) - 1;
+        htim16.Instance->CCR1 = (r38V / 3.3 * (htim16.Instance->ARR + 1)) - 1;
 
         if (sysTime_msFlag)
         {
             sysTime_msFlag = 0;
+
             printf("\n");
 
             LCD_ClearLine(Line1);
-            sprintf((char *)dispBuffer, "A1=%.2fV,F1=%uHz", r37V, r39Val);
+            sprintf((char *)dispBuffer, "A1=%.2fV,F1=%uHz", r37V, r39Freq);
             LCD_DisplayStringLine(Line1, dispBuffer), printf("%s\n", dispBuffer);
 
             LCD_ClearLine(Line2);
-            sprintf((char *)dispBuffer, "A2=%.2fV,F2=%uHz", r38V, r40Val);
+            sprintf((char *)dispBuffer, "A2=%.2fV,F2=%uHz", r38V, r40Freq);
             LCD_DisplayStringLine(Line2, dispBuffer), printf("%s\n", dispBuffer);
 
             LCD_ClearLine(Line3);
             LCD_ClearLine(Line4);
-            sprintf((char *)dispBuffer, "PA1/F=%.2fHz", pwmF);
+            sprintf((char *)dispBuffer, "PA12/F=%.2fHz", pwmO[0]);
             LCD_DisplayStringLine(Line3, dispBuffer), printf("%s\n", dispBuffer);
-            sprintf((char *)dispBuffer, "PA1/D=%.2f%%", pwmD);
+            sprintf((char *)dispBuffer, "PA12/D=%.2f%%", pwmO[1]);
             LCD_DisplayStringLine(Line4, dispBuffer), printf("%s\n", dispBuffer);
 
             LCD_ClearLine(Line5);
@@ -214,9 +223,14 @@ int main(void)
             LCD_DisplayStringLine(Line5, dispBuffer), printf("%s\n", dispBuffer);
 
             LCD_ClearLine(Line6);
-            sprintf((char *)dispBuffer, "Res=%.2fV,%.2fK", mcpV, mcpR);
+            sprintf((char *)dispBuffer, "Res=%.2fV,%.2fKOhm", mcpV, mcpR);
             LCD_DisplayStringLine(Line6, dispBuffer), printf("%s\n", dispBuffer);
+
+            LCD_ClearLine(Line9);
+            sprintf((char *)dispBuffer, "PA11=%.2fkHz,%.2f%%", (pwmC[0] / 1000), (pwmC[0] / pwmC[1] * 100));
+            LCD_DisplayStringLine(Line9, dispBuffer), printf("%s\n", dispBuffer);
         }
+
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
@@ -229,8 +243,8 @@ int main(void)
         mcp_res = mcpRead();
         mcpR = mcp_res * (7.874e-1);
 
-        pwmD = 100.0 * (htim2.Instance->CCR2 + 1) / (htim2.Instance->ARR + 1);
-        pwmF = 80e6 / (htim2.Instance->ARR + 1) / (htim2.Instance->PSC + 1);
+        pwmO[1] = 100.0 * (__HAL_TIM_GET_COMPARE(&htim16, TIM_CHANNEL_1) + 1) / (1 + __HAL_TIM_GET_AUTORELOAD(&htim16));
+        pwmO[0] = getTimeBase(&htim16) * 1.0 / (1 + __HAL_TIM_GET_AUTORELOAD(&htim16));
 
         HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dacVal);
     }
@@ -282,7 +296,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void keyResp(void)
+inline void keyResp(void)
 {
 
     /* B1s */
@@ -404,7 +418,7 @@ void keyResp(void)
     }
 }
 
-void uartRespRX(void)
+inline void uartRespRX(void)
 {
     LCD_ClearLine(Line8);
     LCD_DisplayStringLine(Line8, uart1Buffer);
@@ -416,26 +430,42 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
     uint32_t timVal;
     if (htim->Instance == TIM8)
     {
-        timVal = __HAL_TIM_GET_COUNTER(&htim8);
-        r40Val = ((uint32_t)1e6) / timVal;
-        __HAL_TIM_SET_COUNTER(&htim8, 0);
-        HAL_TIM_IC_Start_IT(&htim8, TIM_CHANNEL_1);
+        timVal = __HAL_TIM_GET_COUNTER(htim);
+        __HAL_TIM_SET_COUNTER(htim, 0);
+        r40Freq = getTimeBase(htim) / timVal;
+        HAL_TIM_IC_Start_IT(htim, TIM_CHANNEL_1);
     }
     if (htim->Instance == TIM3)
     {
-        timVal = __HAL_TIM_GET_COUNTER(&htim3);
-        r39Val = ((uint32_t)1e6) / timVal;
-        __HAL_TIM_SET_COUNTER(&htim3, 0);
-        HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
+        timVal = __HAL_TIM_GET_COUNTER(htim);
+        __HAL_TIM_SET_COUNTER(htim, 0);
+        r39Freq = getTimeBase(htim) / timVal;
+        HAL_TIM_IC_Start_IT(htim, TIM_CHANNEL_1);
+    }
+    if (htim->Instance == TIM4)
+    {
+        if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
+        {
+            timVal = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1) + 1;
+            pwmC[0] = getTimeBase(htim) * 1.0 / timVal;
+            HAL_TIM_IC_Start_IT(htim, TIM_CHANNEL_1);
+        }
+        if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
+        {
+            timVal = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) + 1;
+            pwmC[1] = getTimeBase(htim) * 1.0 / timVal;
+            // HAL_TIM_IC_Start_IT(htim, TIM_CHANNEL_2);
+        }
     }
 }
+
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
     if (huart->Instance == USART1)
     {
         uartRespRX();
         memset(uart1Buffer, 0, sizeof(uart1Buffer));
-        HAL_UARTEx_ReceiveToIdle_DMA(&huart1, uart1Buffer, (sizeof(uart1Buffer) - 1));
+        HAL_UARTEx_ReceiveToIdle_DMA(huart, uart1Buffer, (sizeof(uart1Buffer) - 1));
     }
 }
 
@@ -444,6 +474,12 @@ int fputc(int ch, FILE *f)
     HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xffff);
     return ch;
 }
+
+inline uint32_t getTimeBase(TIM_HandleTypeDef *htim)
+{
+    return (HAL_RCC_GetSysClockFreq() / (htim->Instance->PSC + 1));
+}
+
 /* USER CODE END 4 */
 
 /**
