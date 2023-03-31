@@ -4,7 +4,7 @@
 
 
 /**
-  * @brief SDAÏßÊäÈëÄ£Ê½ÅäÖÃ
+  * @brief SDAçº¿è¾“å…¥æ¨¡å¼é…ç½®
   * @param None
   * @retval None
   */
@@ -20,7 +20,7 @@ void SDA_Input_Mode()
 }
 
 /**
-  * @brief SDAÏßÊä³öÄ£Ê½ÅäÖÃ
+  * @brief SDAçº¿è¾“å‡ºæ¨¡å¼é…ç½®
   * @param None
   * @retval None
   */
@@ -36,8 +36,8 @@ void SDA_Output_Mode()
 }
 
 /**
-  * @brief SDAÏßÊä³öÒ»¸öÎ»
-  * @param val Êä³öµÄÊı¾İ
+  * @brief SDAçº¿è¾“å‡ºä¸€ä¸ªä½
+  * @param val è¾“å‡ºçš„æ•°æ®
   * @retval None
   */
 void SDA_Output( uint16_t val )
@@ -53,8 +53,8 @@ void SDA_Output( uint16_t val )
 }
 
 /**
-  * @brief SCLÏßÊä³öÒ»¸öÎ»
-  * @param val Êä³öµÄÊı¾İ
+  * @brief SCLçº¿è¾“å‡ºä¸€ä¸ªä½
+  * @param val è¾“å‡ºçš„æ•°æ®
   * @retval None
   */
 void SCL_Output( uint16_t val )
@@ -70,9 +70,9 @@ void SCL_Output( uint16_t val )
 }
 
 /**
-  * @brief SDAÊäÈëÒ»Î»
+  * @brief SDAè¾“å…¥ä¸€ä½
   * @param None
-  * @retval GPIO¶ÁÈëÒ»Î»
+  * @retval GPIOè¯»å…¥ä¸€ä½
   */
 uint8_t SDA_Input(void)
 {
@@ -85,7 +85,7 @@ uint8_t SDA_Input(void)
 
 
 /**
-  * @brief I2CµÄ¶ÌÔİÑÓÊ±
+  * @brief I2Cçš„çŸ­æš‚å»¶æ—¶
   * @param None
   * @retval None
   */
@@ -96,7 +96,7 @@ static void delay1(unsigned int n)
 }
 
 /**
-  * @brief I2CÆğÊ¼ĞÅºÅ
+  * @brief I2Cèµ·å§‹ä¿¡å·
   * @param None
   * @retval None
   */
@@ -113,7 +113,7 @@ void I2CStart(void)
 }
 
 /**
-  * @brief I2C½áÊøĞÅºÅ
+  * @brief I2Cç»“æŸä¿¡å·
   * @param None
   * @retval None
   */
@@ -131,7 +131,7 @@ void I2CStop(void)
 }
 
 /**
-  * @brief I2CµÈ´ıÈ·ÈÏĞÅºÅ
+  * @brief I2Cç­‰å¾…ç¡®è®¤ä¿¡å·
   * @param None
   * @retval None
   */
@@ -160,7 +160,7 @@ unsigned char I2CWaitAck(void)
 }
 
 /**
-  * @brief I2C·¢ËÍÈ·ÈÏĞÅºÅ
+  * @brief I2Cå‘é€ç¡®è®¤ä¿¡å·
   * @param None
   * @retval None
   */
@@ -177,7 +177,7 @@ void I2CSendAck(void)
 }
 
 /**
-  * @brief I2C·¢ËÍ·ÇÈ·ÈÏĞÅºÅ
+  * @brief I2Cå‘é€éç¡®è®¤ä¿¡å·
   * @param None
   * @retval None
   */
@@ -194,8 +194,8 @@ void I2CSendNotAck(void)
 }
 
 /**
-  * @brief I2C·¢ËÍÒ»¸ö×Ö½Ú
-  * @param cSendByte ĞèÒª·¢ËÍµÄ×Ö½Ú
+  * @brief I2Cå‘é€ä¸€ä¸ªå­—èŠ‚
+  * @param cSendByte éœ€è¦å‘é€çš„å­—èŠ‚
   * @retval None
   */
 void I2CSendByte(unsigned char cSendByte)
@@ -217,9 +217,9 @@ void I2CSendByte(unsigned char cSendByte)
 }
 
 /**
-  * @brief I2C½ÓÊÕÒ»¸ö×Ö½Ú
+  * @brief I2Cæ¥æ”¶ä¸€ä¸ªå­—èŠ‚
   * @param None
-  * @retval ½ÓÊÕµ½µÄ×Ö½Ú
+  * @retval æ¥æ”¶åˆ°çš„å­—èŠ‚
   */
 unsigned char I2CReceiveByte(void)
 {
