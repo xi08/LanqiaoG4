@@ -8,12 +8,12 @@
 uint8_t mcpRead(void)
 {
     uint8_t val;
-    i2c_start();
-    i2c_send(0x5f);
-    i2c_wack();
-    val = i2c_receive();
-    i2c_nak();
-    i2c_stop();
+    I2CStart();
+    I2CSendByte(0x5f);
+    I2CWaitAck();
+    val = I2CReceiveByte();
+    I2CSendNotAck();
+    I2CStop();
     return val;
 }
 
@@ -24,12 +24,12 @@ uint8_t mcpRead(void)
  */
 void mcpWrite(uint8_t val)
 {
-    i2c_start();
-    i2c_send(0x5e);
-    i2c_wack();
-    i2c_send(val);
-    i2c_wack();
-    i2c_stop();
+    I2CStart();
+    I2CSendByte(0x5e);
+    I2CWaitAck();
+    I2CSendByte(val);
+    I2CWaitAck();
+    I2CStop();
 }
 
 /**
@@ -41,17 +41,17 @@ void mcpWrite(uint8_t val)
 uint8_t eeRead(uint8_t addr)
 {
     uint8_t val;
-    i2c_start();
-    i2c_send(0xa0);
-    i2c_wack();
-    i2c_send(addr);
-    i2c_wack();
-    i2c_start();
-    i2c_send(0xa1);
-    i2c_wack();
-    val = i2c_receive();
-    i2c_wack();
-    i2c_stop();
+    I2CStart();
+    I2CSendByte(0xa0);
+    I2CWaitAck();
+    I2CSendByte(addr);
+    I2CWaitAck();
+    I2CStart();
+    I2CSendByte(0xa1);
+    I2CWaitAck();
+    val = I2CReceiveByte();
+    I2CWaitAck();
+    I2CStop();
     return val;
 }
 
@@ -63,14 +63,14 @@ uint8_t eeRead(uint8_t addr)
  */
 void eeWrite(uint8_t addr, uint8_t dat)
 {
-    i2c_start();
-    i2c_send(0xa0);
-    i2c_wack();
-    i2c_send(addr);
-    i2c_wack();
-    i2c_send(dat);
-    i2c_wack();
-    i2c_stop();
+    I2CStart();
+    I2CSendByte(0xa0);
+    I2CWaitAck();
+    I2CSendByte(addr);
+    I2CWaitAck();
+    I2CSendByte(dat);
+    I2CWaitAck();
+    I2CStop();
 }
 
 /**
@@ -82,23 +82,23 @@ void eeWrite(uint8_t addr, uint8_t dat)
  */
 void eeReadP(uint8_t addr, uint8_t *buf, uint8_t n)
 {
-    i2c_start();
-    i2c_send(0xa0);
-    i2c_wack();
-    i2c_send(addr);
-    i2c_wack();
-    i2c_start();
-    i2c_send(0xa1);
-    i2c_wack();
+    I2CStart();
+    I2CSendByte(0xa0);
+    I2CWaitAck();
+    I2CSendByte(addr);
+    I2CWaitAck();
+    I2CStart();
+    I2CSendByte(0xa1);
+    I2CWaitAck();
     while (n--)
     {
-        *buf++ = i2c_receive();
+        *buf++ = I2CReceiveByte();
         if (n)
-            i2c_ack();
+            I2CSendAck();
         else
-            i2c_nak();
+            I2CSendNotAck();
     }
-    i2c_stop();
+    I2CStop();
 }
 
 /**
@@ -110,16 +110,16 @@ void eeReadP(uint8_t addr, uint8_t *buf, uint8_t n)
  */
 void eeWriteP(uint8_t addr, uint8_t *dat, uint8_t n)
 {
-    i2c_start();
-    i2c_send(0xa0);
-    i2c_wack();
-    i2c_send(addr);
-    i2c_wack();
+    I2CStart();
+    I2CSendByte(0xa0);
+    I2CWaitAck();
+    I2CSendByte(addr);
+    I2CWaitAck();
     while (n--)
     {
-        i2c_send(*dat++);
-        i2c_wack();
+        I2CSendByte(*dat++);
+        I2CWaitAck();
     }
-    i2c_stop();
+    I2CStop();
     HAL_Delay(6);
 }
