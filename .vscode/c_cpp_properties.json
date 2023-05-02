@@ -6,7 +6,7 @@
                 "${workspaceFolder}/**",
                 "C:/Keil_v5/ARM/ARMCLANG/include/**",
                 "C:/Keil_v5/ARM/Packs/ARM/CMSIS/5.9.0/CMSIS/Core/Include",
-                "C:/Keil_v5/ARM/Packs/Keil/STM32G4xx_DFP/1.5.0/Drivers/CMSIS/Device/ST/STM32G4xx/Include"
+                "C:/Keil_v5/ARM/Packs/Keil/STM32G4xx_DFP/1.4.0/Drivers/CMSIS/Device/ST/STM32G4xx/Include"
             ],
             "defines": [
                 "__UVISION_VERSION=\"538\"",
@@ -31,9 +31,9 @@
             "cStandard": "c99",
             "cppStandard": "c++11",
             "intelliSenseMode": "gcc-arm",
-            "mergeConfigurations": true,
+            "mergeConfigurations": false,
             "browse": {
-                "limitSymbolsToIncludedHeaders": true
+                "limitSymbolsToIncludedHeaders": false
             }
         }
     ],

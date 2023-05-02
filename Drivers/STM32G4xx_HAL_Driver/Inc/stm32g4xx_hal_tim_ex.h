@@ -6,12 +6,13 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2019 STMicroelectronics.
-  * All rights reserved.
+  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+  * All rights reserved.</center></h2>
   *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
+  * This software component is licensed by ST under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
   *
   ******************************************************************************
   */
@@ -70,26 +71,27 @@ typedef struct
                                 This parameter can be a value of @ref TIMEx_Break_Input_Source_Enable */
   uint32_t Polarity;       /*!< Specifies the break input source polarity.
                                 This parameter can be a value of @ref TIMEx_Break_Input_Source_Polarity */
-} TIMEx_BreakInputConfigTypeDef;
+}
+TIMEx_BreakInputConfigTypeDef;
 
 /**
   * @brief  TIM Encoder index configuration
   */
 typedef struct
 {
-  uint32_t Polarity;                  /*!< TIM Encoder index polarity.This parameter can be a value of @ref TIMEx_Encoder_Index_Polarity */
-
-  uint32_t Prescaler;                 /*!< TIM Encoder index prescaler.This parameter can be a value of @ref TIMEx_Encoder_Index_Prescaler */
-
-  uint32_t Filter;                    /*!< TIM Encoder index filter.This parameter can be a number between Min_Data = 0x0 and Max_Data = 0xF */
-
-  FunctionalState  FirstIndexEnable;  /*!< Specifies whether or not the encoder first index is enabled.This parameter value can be ENABLE or DISABLE. */
-
-  uint32_t Position;                  /*!< Specifies in which AB input configuration the index event resets the counter.This parameter can be a value of @ref TIMEx_Encoder_Index_Position */
-
-  uint32_t Direction;                 /*!< Specifies in which counter direction the index event resets the counter.This parameter can be a value of @ref TIMEx_Encoder_Index_Direction */
-
-} TIMEx_EncoderIndexConfigTypeDef;
+  uint32_t Polarity;                  /*!< TIM Encoder index polarity.
+                                           This parameter can be a value of @ref TIMEx_Encoder_Index_Polarity */
+  uint32_t Prescaler;                 /*!< TIM Encoder index prescaler.
+                                           This parameter can be a value of @ref TIMEx_Encoder_Index_Prescaler */
+  uint32_t Filter;                    /*!< TIM Encoder index filter.
+                                           This parameter can be a number between Min_Data = 0x0 and Max_Data = 0xF */
+  FunctionalState  FirstIndexEnable;  /*!< Specifies whether or not the encoder first index is enabled.
+                                           This parameter value can be ENABLE or DISABLE. */
+  uint32_t Position;                  /*!< Specifies in which AB input configuration the index event resets the counter.
+                                           This parameter can be a value of @ref TIMEx_Encoder_Index_Position */
+  uint32_t Direction;                 /*!< Specifies in which counter direction the index event resets the counter.
+                                           This parameter can be a value of @ref TIMEx_Encoder_Index_Direction */
+} TIMEx_EncoderIndexConfigTypeDef ;
 
 /**
   * @}
@@ -235,23 +237,15 @@ typedef struct
 #define TIM_TIM20_ETR_COMP2      TIM1_AF1_ETRSEL_1                                           /* !< ETR input is connected to COMP2_OUT */
 #define TIM_TIM20_ETR_COMP3      (TIM1_AF1_ETRSEL_1 | TIM1_AF1_ETRSEL_0)                     /* !< ETR input is connected to COMP3_OUT */
 #define TIM_TIM20_ETR_COMP4      TIM1_AF1_ETRSEL_2                                           /* !< ETR input is connected to COMP4_OUT */
-#if defined(COMP5)
 #define TIM_TIM20_ETR_COMP5      (TIM1_AF1_ETRSEL_2 | TIM1_AF1_ETRSEL_0)                     /* !< ETR input is connected to COMP5_OUT */
-#endif /* COMP5 */
-#if defined(COMP6)
 #define TIM_TIM20_ETR_COMP6      (TIM1_AF1_ETRSEL_2 | TIM1_AF1_ETRSEL_1)                     /* !< ETR input is connected to COMP6_OUT */
-#endif /* COMP6 */
-#if defined(COMP7)
 #define TIM_TIM20_ETR_COMP7      (TIM1_AF1_ETRSEL_2 | TIM1_AF1_ETRSEL_1 | TIM1_AF1_ETRSEL_0) /* !< ETR input is connected to COMP7_OUT */
-#endif /* COMP7 */
 #define TIM_TIM20_ETR_ADC3_AWD1  TIM1_AF1_ETRSEL_3                                           /* !< ADC3 analog watchdog 1 */
 #define TIM_TIM20_ETR_ADC3_AWD2  (TIM1_AF1_ETRSEL_3 | TIM1_AF1_ETRSEL_0)                     /* !< ADC3 analog watchdog 2 */
 #define TIM_TIM20_ETR_ADC3_AWD3  (TIM1_AF1_ETRSEL_3 | TIM1_AF1_ETRSEL_1)                     /* !< ADC3 analog watchdog 3 */
-#if defined (ADC5)
 #define TIM_TIM20_ETR_ADC5_AWD1  (TIM1_AF1_ETRSEL_3 | TIM1_AF1_ETRSEL_1 | TIM1_AF1_ETRSEL_0) /* !< ADC5 analog watchdog 1 */
 #define TIM_TIM20_ETR_ADC5_AWD2  (TIM1_AF1_ETRSEL_3 | TIM1_AF1_ETRSEL_2)                     /* !< ADC5 analog watchdog 2 */
 #define TIM_TIM20_ETR_ADC5_AWD3  (TIM1_AF1_ETRSEL_3 | TIM1_AF1_ETRSEL_2 | TIM1_AF1_ETRSEL_0) /* !< ADC5 analog watchdog 3 */
-#endif /* ADC5 */
 #endif /* TIM20 */
 /**
   * @}
@@ -260,8 +254,8 @@ typedef struct
 /** @defgroup TIMEx_Break_Input TIM Extended Break input
   * @{
   */
-#define TIM_BREAKINPUT_BRK     0x00000001U                                      /*!< Timer break input  */
-#define TIM_BREAKINPUT_BRK2    0x00000002U                                      /*!< Timer break2 input */
+#define TIM_BREAKINPUT_BRK     0x00000001U                                      /* !< Timer break input  */
+#define TIM_BREAKINPUT_BRK2    0x00000002U                                      /* !< Timer break2 input */
 /**
   * @}
   */
@@ -290,8 +284,8 @@ typedef struct
 /** @defgroup TIMEx_Break_Input_Source_Enable TIM Extended Break input source enabling
   * @{
   */
-#define TIM_BREAKINPUTSOURCE_DISABLE     0x00000000U                            /*!< Break input source is disabled */
-#define TIM_BREAKINPUTSOURCE_ENABLE      0x00000001U                            /*!< Break input source is enabled */
+#define TIM_BREAKINPUTSOURCE_DISABLE     0x00000000U                            /* !< Break input source is disabled */
+#define TIM_BREAKINPUTSOURCE_ENABLE      0x00000001U                            /* !< Break input source is enabled */
 /**
   * @}
   */
@@ -299,8 +293,8 @@ typedef struct
 /** @defgroup TIMEx_Break_Input_Source_Polarity TIM Extended Break input polarity
   * @{
   */
-#define TIM_BREAKINPUTSOURCE_POLARITY_LOW     0x00000001U                       /*!< Break input source is active low */
-#define TIM_BREAKINPUTSOURCE_POLARITY_HIGH    0x00000000U                       /*!< Break input source is active_high */
+#define TIM_BREAKINPUTSOURCE_POLARITY_LOW     0x00000001U                       /* !< Break input source is active low */
+#define TIM_BREAKINPUTSOURCE_POLARITY_HIGH    0x00000000U                       /* !< Break input source is active_high */
 /**
   * @}
   */
@@ -598,22 +592,19 @@ typedef struct
   (((__TIMCLK__)/((__PSC__) + 1U)) >= (__FREQ__)) ? ((__TIMCLK__)/((__FREQ__) * ((__PSC__) + 1U)) - 1U) : 0U
 
 /**
-  * @brief  HELPER macro calculating the auto-reload value, with dithering feature enabled, to achieve the required
-  *         output signal frequency.
+  * @brief  HELPER macro calculating the auto-reload value, with dithering feature enabled, to achieve the required output signal frequency.
   * @note   ex: @ref __HAL_TIM_CALC_PERIOD_DITHER(1000000, 0, 10000);
-  * @note   This macro should be used only if dithering is already enabled
+  * @note   This macro should be used only if ditehring is already enabled
   * @param  __TIMCLK__ timer input clock frequency (in Hz)
   * @param  __PSC__ prescaler
   * @param  __FREQ__ output signal frequency (in Hz)
   * @retval  Auto-reload value  (between Min_Data=0 and Max_Data=65519)
   */
 #define __HAL_TIM_CALC_PERIOD_DITHER(__TIMCLK__, __PSC__, __FREQ__) \
-  (((__TIMCLK__)/((__PSC__) + 1U)) >= (__FREQ__)) ? \
-  (uint32_t)(((uint64_t)(__TIMCLK__)*16/((__FREQ__) * ((__PSC__) + 1U)) - 16U)) : 0U
+  (((__TIMCLK__)/((__PSC__) + 1U)) >= (__FREQ__)) ?   (uint32_t)(((uint64_t)(__TIMCLK__)*16/((__FREQ__) * ((__PSC__) + 1U)) - 16U)) : 0U
 
 /**
-  * @brief  HELPER macro calculating the compare value required to achieve the required timer output compare
-  *         active/inactive delay.
+  * @brief  HELPER macro calculating the compare value required to achieve the required timer output compare active/inactive delay.
   * @note   ex: @ref __HAL_TIM_CALC_PULSE(1000000, 0, 10);
   * @param  __TIMCLK__ timer input clock frequency (in Hz)
   * @param  __PSC__ prescaler
@@ -625,10 +616,9 @@ typedef struct
               / ((uint64_t)1000000U * (uint64_t)((__PSC__) + 1U))))
 
 /**
-  * @brief  HELPER macro calculating the compare value, with dithering feature enabled, to achieve the required timer
-  *         output compare active/inactive delay.
+  * @brief  HELPER macro calculating the compare value, with dithering feature enabled, to achieve the required timer output compare active/inactive delay.
   * @note   ex: @ref __HAL_TIM_CALC_PULSE_DITHER(1000000, 0, 10);
-  * @note   This macro should be used only if dithering is already enabled
+  * @note   This macro should be used only if ditehring is already enabled
   * @param  __TIMCLK__ timer input clock frequency (in Hz)
   * @param  __PSC__ prescaler
   * @param  __DELAY__ timer output compare active/inactive delay (in us)
@@ -639,8 +629,7 @@ typedef struct
               / ((uint64_t)1000000U * (uint64_t)((__PSC__) + 1U))))
 
 /**
-  * @brief  HELPER macro calculating the auto-reload value to achieve the required pulse duration
-  *        (when the timer operates in one pulse mode).
+  * @brief  HELPER macro calculating the auto-reload value to achieve the required pulse duration (when the timer operates in one pulse mode).
   * @note   ex: @ref __HAL_TIM_CALC_PERIOD_BY_DELAY(1000000, 0, 10, 20);
   * @param  __TIMCLK__ timer input clock frequency (in Hz)
   * @param  __PSC__ prescaler
@@ -653,10 +642,9 @@ typedef struct
               + __HAL_TIM_CALC_PULSE((__TIMCLK__), (__PSC__), (__DELAY__))))
 
 /**
-  * @brief  HELPER macro calculating the auto-reload value, with dithering feature enabled, to achieve the required
-  *         pulse duration (when the timer operates in one pulse mode).
+  * @brief  HELPER macro calculating the auto-reload value, with dithering feature enabled, to achieve the required pulse duration (when the timer operates in one pulse mode).
   * @note   ex: @ref __HAL_TIM_CALC_PERIOD_DITHER_BY_DELAY(1000000, 0, 10, 20);
-  * @note   This macro should be used only if dithering is already enabled
+  * @note   This macro should be used only if ditehring is already enabled
   * @param  __TIMCLK__ timer input clock frequency (in Hz)
   * @param  __PSC__ prescaler
   * @param  __DELAY__ timer output compare active/inactive delay (in us)
@@ -1107,7 +1095,8 @@ typedef struct
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR5)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)))            \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR10)))            \
    ||                                        \
    (((INSTANCE) == TIM2) &&                  \
     (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
@@ -1124,6 +1113,7 @@ typedef struct
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR10)     ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR11)))            \
    ||                                        \
    (((INSTANCE) == TIM3) &&                  \
@@ -1140,7 +1130,8 @@ typedef struct
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR5)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)))            \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR10)))            \
    ||                                        \
    (((INSTANCE) == TIM4) &&                  \
     (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
@@ -1156,7 +1147,8 @@ typedef struct
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR5)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)))            \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR10)))            \
    ||                                        \
    (((INSTANCE) == TIM5) &&                  \
     (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
@@ -1172,7 +1164,8 @@ typedef struct
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR5)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)))            \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR10)))            \
    ||                                        \
    (((INSTANCE) == TIM8) &&                  \
     (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
@@ -1188,7 +1181,8 @@ typedef struct
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR4)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)))            \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR10)))            \
    ||                                        \
    (((INSTANCE) == TIM15) &&                 \
     (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
@@ -1202,7 +1196,8 @@ typedef struct
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR4)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR5)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8))))
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR10))))
 
 #define IS_TIM_TRIGGER_INSTANCE(INSTANCE, __SELECTION__) \
   ((((INSTANCE) == TIM1) &&                  \
@@ -1217,7 +1212,8 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR5)    ||          \
      ((__SELECTION__) == TIM_TS_ITR6)    ||          \
      ((__SELECTION__) == TIM_TS_ITR7)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR8)))             \
+     ((__SELECTION__) == TIM_TS_ITR8)    ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)))             \
    ||                                        \
    (((INSTANCE) == TIM2) &&                  \
     (((__SELECTION__) == TIM_TS_ITR0)    ||          \
@@ -1232,6 +1228,7 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR6)    ||          \
      ((__SELECTION__) == TIM_TS_ITR7)    ||          \
      ((__SELECTION__) == TIM_TS_ITR8)    ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)   ||          \
      ((__SELECTION__) == TIM_TS_ITR11)))             \
    ||                                        \
    (((INSTANCE) == TIM3) &&                  \
@@ -1246,7 +1243,8 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR5)    ||          \
      ((__SELECTION__) == TIM_TS_ITR6)    ||          \
      ((__SELECTION__) == TIM_TS_ITR7)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR8)))             \
+     ((__SELECTION__) == TIM_TS_ITR8)    ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)))             \
    ||                                        \
    (((INSTANCE) == TIM4) &&                  \
     (((__SELECTION__) == TIM_TS_ITR0)    ||          \
@@ -1260,7 +1258,8 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR5)    ||          \
      ((__SELECTION__) == TIM_TS_ITR6)    ||          \
      ((__SELECTION__) == TIM_TS_ITR7)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR8)))             \
+     ((__SELECTION__) == TIM_TS_ITR8)    ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)))             \
    ||                                        \
    (((INSTANCE) == TIM5) &&                  \
     (((__SELECTION__) == TIM_TS_ITR0)    ||          \
@@ -1274,7 +1273,8 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR5)    ||          \
      ((__SELECTION__) == TIM_TS_ITR6)    ||          \
      ((__SELECTION__) == TIM_TS_ITR7)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR8)))             \
+     ((__SELECTION__) == TIM_TS_ITR8)    ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)))             \
    ||                                        \
    (((INSTANCE) == TIM8) &&                  \
     (((__SELECTION__) == TIM_TS_ITR0)    ||          \
@@ -1288,7 +1288,8 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR4)    ||          \
      ((__SELECTION__) == TIM_TS_ITR6)    ||          \
      ((__SELECTION__) == TIM_TS_ITR7)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR8)))             \
+     ((__SELECTION__) == TIM_TS_ITR8)    ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)))             \
    ||                                        \
    (((INSTANCE) == TIM15) &&                 \
     (((__SELECTION__) == TIM_TS_ITR0)    ||          \
@@ -1301,7 +1302,8 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR4)    ||          \
      ((__SELECTION__) == TIM_TS_ITR5)    ||          \
      ((__SELECTION__) == TIM_TS_ITR7)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR8))))
+     ((__SELECTION__) == TIM_TS_ITR8)    ||          \
+     ((__SELECTION__) == TIM_TS_ITR10))))
 
 #define IS_TIM_INTERNAL_TRIGGEREVENT_INSTANCE(INSTANCE, __SELECTION__) \
   ((((INSTANCE) == TIM1) &&                  \
@@ -1313,6 +1315,7 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR6) ||          \
      ((__SELECTION__) == TIM_TS_ITR7) ||          \
      ((__SELECTION__) == TIM_TS_ITR8) ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)||          \
      ((__SELECTION__) == TIM_TS_NONE)))           \
    ||                                        \
    (((INSTANCE) == TIM2) &&                  \
@@ -1324,6 +1327,7 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR6) ||          \
      ((__SELECTION__) == TIM_TS_ITR7) ||          \
      ((__SELECTION__) == TIM_TS_ITR8) ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)||          \
      ((__SELECTION__) == TIM_TS_ITR11)||          \
      ((__SELECTION__) == TIM_TS_NONE)))           \
    ||                                        \
@@ -1336,6 +1340,7 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR6) ||          \
      ((__SELECTION__) == TIM_TS_ITR7) ||          \
      ((__SELECTION__) == TIM_TS_ITR8) ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)||          \
      ((__SELECTION__) == TIM_TS_NONE)))           \
    ||                                        \
    (((INSTANCE) == TIM4) &&                  \
@@ -1347,6 +1352,7 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR6) ||          \
      ((__SELECTION__) == TIM_TS_ITR7) ||          \
      ((__SELECTION__) == TIM_TS_ITR8) ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)||          \
      ((__SELECTION__) == TIM_TS_NONE)))           \
    ||                                        \
    (((INSTANCE) == TIM5) &&                  \
@@ -1358,6 +1364,7 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR6) ||          \
      ((__SELECTION__) == TIM_TS_ITR7) ||          \
      ((__SELECTION__) == TIM_TS_ITR8) ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)||          \
      ((__SELECTION__) == TIM_TS_NONE)))           \
    ||                                        \
    (((INSTANCE) == TIM8) &&                  \
@@ -1369,6 +1376,7 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR6) ||          \
      ((__SELECTION__) == TIM_TS_ITR7) ||          \
      ((__SELECTION__) == TIM_TS_ITR8) ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)||          \
      ((__SELECTION__) == TIM_TS_NONE)))           \
    ||                                        \
    (((INSTANCE) == TIM15) &&                 \
@@ -1380,297 +1388,9 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR5) ||          \
      ((__SELECTION__) == TIM_TS_ITR7) ||          \
      ((__SELECTION__) == TIM_TS_ITR8) ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)||          \
      ((__SELECTION__) == TIM_TS_NONE))))
-#elif defined(TIM20)
-#define IS_TIM_CLOCKSOURCE_INSTANCE(INSTANCE, __CLOCK__) \
-  ((((INSTANCE) == TIM1) &&                  \
-    (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE2)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR1)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR2)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR3)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI1ED)     ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI1)       ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI2)       ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE1)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR5)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR9)))            \
-   ||                                        \
-   (((INSTANCE) == TIM2) &&                  \
-    (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE2)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR0)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR2)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR3)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI1ED)     ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI1)       ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI2)       ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE1)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR5)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR9)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR11)))            \
-   ||                                        \
-   (((INSTANCE) == TIM3) &&                  \
-    (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE2)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR0)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR1)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR3)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI1ED)     ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI1)       ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI2)       ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE1)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR5)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR9)))            \
-   ||                                        \
-   (((INSTANCE) == TIM4) &&                  \
-    (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE2)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR0)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR1)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR2)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI1ED)     ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI1)       ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI2)       ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE1)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR5)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR9)))            \
-   ||                                        \
-   (((INSTANCE) == TIM8) &&                  \
-    (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE2)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR0)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR1)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR2)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR3)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI1ED)     ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI1)       ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI2)       ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE1)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR9)))            \
-   ||                                        \
-   (((INSTANCE) == TIM15) &&                 \
-    (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR0)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR1)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR2)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR3)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI1ED)     ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI1)       ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI2)       ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR5)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR9)))            \
-   ||                                        \
-   (((INSTANCE) == TIM20) &&                 \
-    (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE2)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR0)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR1)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR2)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR3)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI1ED)     ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI1)       ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_TI2)       ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE1)  ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR5)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8))))
 
-#define IS_TIM_TRIGGER_INSTANCE(INSTANCE, __SELECTION__) \
-  ((((INSTANCE) == TIM1) &&                  \
-    (((__SELECTION__) == TIM_TS_ITR1)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR2)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR3)    ||          \
-     ((__SELECTION__) == TIM_TS_TI1F_ED) ||          \
-     ((__SELECTION__) == TIM_TS_TI1FP1)  ||          \
-     ((__SELECTION__) == TIM_TS_TI2FP2)  ||          \
-     ((__SELECTION__) == TIM_TS_ETRF)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR5)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR6)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR7)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR8)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR9)))             \
-   ||                                        \
-   (((INSTANCE) == TIM2) &&                  \
-    (((__SELECTION__) == TIM_TS_ITR0)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR2)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR3)    ||          \
-     ((__SELECTION__) == TIM_TS_TI1F_ED) ||          \
-     ((__SELECTION__) == TIM_TS_TI1FP1)  ||          \
-     ((__SELECTION__) == TIM_TS_TI2FP2)  ||          \
-     ((__SELECTION__) == TIM_TS_ETRF)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR5)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR6)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR7)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR8)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR9)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR11)))             \
-   ||                                        \
-   (((INSTANCE) == TIM3) &&                  \
-    (((__SELECTION__) == TIM_TS_ITR0)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR1)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR3)    ||          \
-     ((__SELECTION__) == TIM_TS_TI1F_ED) ||          \
-     ((__SELECTION__) == TIM_TS_TI1FP1)  ||          \
-     ((__SELECTION__) == TIM_TS_TI2FP2)  ||          \
-     ((__SELECTION__) == TIM_TS_ETRF)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR5)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR6)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR7)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR8)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR9)))             \
-   ||                                        \
-   (((INSTANCE) == TIM4) &&                  \
-    (((__SELECTION__) == TIM_TS_ITR0)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR1)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR2)    ||          \
-     ((__SELECTION__) == TIM_TS_TI1F_ED) ||          \
-     ((__SELECTION__) == TIM_TS_TI1FP1)  ||          \
-     ((__SELECTION__) == TIM_TS_TI2FP2)  ||          \
-     ((__SELECTION__) == TIM_TS_ETRF)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR5)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR6)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR7)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR8)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR9)))             \
-   ||                                       \
-   (((INSTANCE) == TIM8) &&                  \
-    (((__SELECTION__) == TIM_TS_ITR0)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR1)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR2)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR3)    ||          \
-     ((__SELECTION__) == TIM_TS_TI1F_ED) ||          \
-     ((__SELECTION__) == TIM_TS_TI1FP1)  ||          \
-     ((__SELECTION__) == TIM_TS_TI2FP2)  ||          \
-     ((__SELECTION__) == TIM_TS_ETRF)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR6)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR7)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR8)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR9)))             \
-   ||                                        \
-   (((INSTANCE) == TIM15) &&                 \
-    (((__SELECTION__) == TIM_TS_ITR0)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR1)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR2)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR3)    ||          \
-     ((__SELECTION__) == TIM_TS_TI1F_ED) ||          \
-     ((__SELECTION__) == TIM_TS_TI1FP1)  ||          \
-     ((__SELECTION__) == TIM_TS_TI2FP2)  ||          \
-     ((__SELECTION__) == TIM_TS_ITR5)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR7)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR8)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR9)))             \
-   ||                                        \
-   (((INSTANCE) == TIM20) &&                 \
-    (((__SELECTION__) == TIM_TS_ITR0)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR1)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR2)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR3)    ||          \
-     ((__SELECTION__) == TIM_TS_TI1F_ED) ||          \
-     ((__SELECTION__) == TIM_TS_TI1FP1)  ||          \
-     ((__SELECTION__) == TIM_TS_TI2FP2)  ||          \
-     ((__SELECTION__) == TIM_TS_ETRF)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR5)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR6)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR7)    ||          \
-     ((__SELECTION__) == TIM_TS_ITR8))))
-
-#define IS_TIM_INTERNAL_TRIGGEREVENT_INSTANCE(INSTANCE, __SELECTION__) \
-  ((((INSTANCE) == TIM1) &&                  \
-    (((__SELECTION__) == TIM_TS_ITR1) ||          \
-     ((__SELECTION__) == TIM_TS_ITR2) ||          \
-     ((__SELECTION__) == TIM_TS_ITR3) ||          \
-     ((__SELECTION__) == TIM_TS_ITR5) ||          \
-     ((__SELECTION__) == TIM_TS_ITR6) ||          \
-     ((__SELECTION__) == TIM_TS_ITR7) ||          \
-     ((__SELECTION__) == TIM_TS_ITR8) ||          \
-     ((__SELECTION__) == TIM_TS_ITR9) ||          \
-     ((__SELECTION__) == TIM_TS_NONE)))           \
-   ||                                        \
-   (((INSTANCE) == TIM2) &&                  \
-    (((__SELECTION__) == TIM_TS_ITR0) ||          \
-     ((__SELECTION__) == TIM_TS_ITR2) ||          \
-     ((__SELECTION__) == TIM_TS_ITR3) ||          \
-     ((__SELECTION__) == TIM_TS_ITR5) ||          \
-     ((__SELECTION__) == TIM_TS_ITR6) ||          \
-     ((__SELECTION__) == TIM_TS_ITR7) ||          \
-     ((__SELECTION__) == TIM_TS_ITR8) ||          \
-     ((__SELECTION__) == TIM_TS_ITR9) ||          \
-     ((__SELECTION__) == TIM_TS_ITR11)||          \
-     ((__SELECTION__) == TIM_TS_NONE)))           \
-   ||                                        \
-   (((INSTANCE) == TIM3) &&                  \
-    (((__SELECTION__) == TIM_TS_ITR0) ||          \
-     ((__SELECTION__) == TIM_TS_ITR1) ||          \
-     ((__SELECTION__) == TIM_TS_ITR3) ||          \
-     ((__SELECTION__) == TIM_TS_ITR5) ||          \
-     ((__SELECTION__) == TIM_TS_ITR6) ||          \
-     ((__SELECTION__) == TIM_TS_ITR7) ||          \
-     ((__SELECTION__) == TIM_TS_ITR8) ||          \
-     ((__SELECTION__) == TIM_TS_ITR9) ||          \
-     ((__SELECTION__) == TIM_TS_NONE)))           \
-   ||                                        \
-   (((INSTANCE) == TIM4) &&                  \
-    (((__SELECTION__) == TIM_TS_ITR0) ||          \
-     ((__SELECTION__) == TIM_TS_ITR1) ||          \
-     ((__SELECTION__) == TIM_TS_ITR2) ||          \
-     ((__SELECTION__) == TIM_TS_ITR5) ||          \
-     ((__SELECTION__) == TIM_TS_ITR6) ||          \
-     ((__SELECTION__) == TIM_TS_ITR7) ||          \
-     ((__SELECTION__) == TIM_TS_ITR8) ||          \
-     ((__SELECTION__) == TIM_TS_ITR9) ||          \
-     ((__SELECTION__) == TIM_TS_NONE)))           \
-   ||                                        \
-   (((INSTANCE) == TIM8) &&                  \
-    (((__SELECTION__) == TIM_TS_ITR0) ||          \
-     ((__SELECTION__) == TIM_TS_ITR1) ||          \
-     ((__SELECTION__) == TIM_TS_ITR2) ||          \
-     ((__SELECTION__) == TIM_TS_ITR3) ||          \
-     ((__SELECTION__) == TIM_TS_ITR6) ||          \
-     ((__SELECTION__) == TIM_TS_ITR7) ||          \
-     ((__SELECTION__) == TIM_TS_ITR8) ||          \
-     ((__SELECTION__) == TIM_TS_ITR9) ||          \
-     ((__SELECTION__) == TIM_TS_NONE)))           \
-   ||                                        \
-   (((INSTANCE) == TIM15) &&                 \
-    (((__SELECTION__) == TIM_TS_ITR0) ||          \
-     ((__SELECTION__) == TIM_TS_ITR1) ||          \
-     ((__SELECTION__) == TIM_TS_ITR2) ||          \
-     ((__SELECTION__) == TIM_TS_ITR3) ||          \
-     ((__SELECTION__) == TIM_TS_ITR5) ||          \
-     ((__SELECTION__) == TIM_TS_ITR7) ||          \
-     ((__SELECTION__) == TIM_TS_ITR8) ||          \
-     ((__SELECTION__) == TIM_TS_ITR9) ||          \
-     ((__SELECTION__) == TIM_TS_NONE)))           \
-   ||                                        \
-   (((INSTANCE) == TIM20) &&                 \
-    (((__SELECTION__) == TIM_TS_ITR0) ||          \
-     ((__SELECTION__) == TIM_TS_ITR1) ||          \
-     ((__SELECTION__) == TIM_TS_ITR2) ||          \
-     ((__SELECTION__) == TIM_TS_ITR3) ||          \
-     ((__SELECTION__) == TIM_TS_ITR5) ||          \
-     ((__SELECTION__) == TIM_TS_ITR6) ||          \
-     ((__SELECTION__) == TIM_TS_ITR7) ||          \
-     ((__SELECTION__) == TIM_TS_ITR8) ||          \
-     ((__SELECTION__) == TIM_TS_NONE))))
 #else
 #define IS_TIM_CLOCKSOURCE_INSTANCE(INSTANCE, __CLOCK__) \
   ((((INSTANCE) == TIM1) &&                  \
@@ -1686,7 +1406,8 @@ typedef struct
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR5)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)))            \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR10)))            \
    ||                                        \
    (((INSTANCE) == TIM2) &&                  \
     (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
@@ -1702,6 +1423,7 @@ typedef struct
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR10)     ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR11)))            \
    ||                                        \
    (((INSTANCE) == TIM3) &&                  \
@@ -1717,7 +1439,8 @@ typedef struct
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR5)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)))            \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR10)))            \
    ||                                        \
    (((INSTANCE) == TIM4) &&                  \
     (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
@@ -1732,7 +1455,8 @@ typedef struct
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR5)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)))            \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR10)))            \
    ||                                        \
    (((INSTANCE) == TIM8) &&                  \
     (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
@@ -1747,7 +1471,8 @@ typedef struct
      ((__CLOCK__) == TIM_CLOCKSOURCE_ETRMODE1)  ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR6)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)))            \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR10)))            \
    ||                                        \
    (((INSTANCE) == TIM15) &&                 \
     (((__CLOCK__) == TIM_CLOCKSOURCE_INTERNAL)  ||          \
@@ -1760,7 +1485,8 @@ typedef struct
      ((__CLOCK__) == TIM_CLOCKSOURCE_TI2)       ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR5)      ||          \
      ((__CLOCK__) == TIM_CLOCKSOURCE_ITR7)      ||          \
-     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8))))
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR8)      ||          \
+     ((__CLOCK__) == TIM_CLOCKSOURCE_ITR10))))
 
 #define IS_TIM_TRIGGER_INSTANCE(INSTANCE, __SELECTION__) \
   ((((INSTANCE) == TIM1) &&                  \
@@ -1774,7 +1500,8 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR5)    ||       \
      ((__SELECTION__) == TIM_TS_ITR6)    ||       \
      ((__SELECTION__) == TIM_TS_ITR7)    ||       \
-     ((__SELECTION__) == TIM_TS_ITR8)))          \
+     ((__SELECTION__) == TIM_TS_ITR8)    ||       \
+     ((__SELECTION__) == TIM_TS_ITR10)))          \
    ||                                        \
    (((INSTANCE) == TIM2) &&                  \
     (((__SELECTION__) == TIM_TS_ITR0)    ||       \
@@ -1788,6 +1515,7 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR6)    ||       \
      ((__SELECTION__) == TIM_TS_ITR7)    ||       \
      ((__SELECTION__) == TIM_TS_ITR8)    ||       \
+     ((__SELECTION__) == TIM_TS_ITR10)   ||       \
      ((__SELECTION__) == TIM_TS_ITR11)))          \
    ||                                        \
    (((INSTANCE) == TIM3) &&                  \
@@ -1801,7 +1529,8 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR5)    ||       \
      ((__SELECTION__) == TIM_TS_ITR6)    ||       \
      ((__SELECTION__) == TIM_TS_ITR7)    ||       \
-     ((__SELECTION__) == TIM_TS_ITR8)))          \
+     ((__SELECTION__) == TIM_TS_ITR8)    ||       \
+     ((__SELECTION__) == TIM_TS_ITR10)))          \
    ||                                        \
    (((INSTANCE) == TIM4) &&                  \
     (((__SELECTION__) == TIM_TS_ITR0)    ||       \
@@ -1814,7 +1543,8 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR5)    ||       \
      ((__SELECTION__) == TIM_TS_ITR6)    ||       \
      ((__SELECTION__) == TIM_TS_ITR7)    ||       \
-     ((__SELECTION__) == TIM_TS_ITR8)))          \
+     ((__SELECTION__) == TIM_TS_ITR8)    ||       \
+     ((__SELECTION__) == TIM_TS_ITR10)))          \
    ||                                        \
    (((INSTANCE) == TIM8) &&                  \
     (((__SELECTION__) == TIM_TS_ITR0)    ||       \
@@ -1827,7 +1557,8 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ETRF)    ||       \
      ((__SELECTION__) == TIM_TS_ITR6)    ||       \
      ((__SELECTION__) == TIM_TS_ITR7)    ||       \
-     ((__SELECTION__) == TIM_TS_ITR8)))          \
+     ((__SELECTION__) == TIM_TS_ITR8)    ||       \
+     ((__SELECTION__) == TIM_TS_ITR10)))          \
    ||                                        \
    (((INSTANCE) == TIM15) &&                 \
     (((__SELECTION__) == TIM_TS_ITR0)    ||       \
@@ -1839,7 +1570,8 @@ typedef struct
      ((__SELECTION__) == TIM_TS_TI2FP2)  ||       \
      ((__SELECTION__) == TIM_TS_ITR5)    ||       \
      ((__SELECTION__) == TIM_TS_ITR7)    ||       \
-     ((__SELECTION__) == TIM_TS_ITR8))))
+     ((__SELECTION__) == TIM_TS_ITR8)    ||       \
+     ((__SELECTION__) == TIM_TS_ITR10))))
 
 #define IS_TIM_INTERNAL_TRIGGEREVENT_INSTANCE(INSTANCE, __SELECTION__) \
   ((((INSTANCE) == TIM1) &&                  \
@@ -1850,6 +1582,7 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR6) ||          \
      ((__SELECTION__) == TIM_TS_ITR7) ||          \
      ((__SELECTION__) == TIM_TS_ITR8) ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)||          \
      ((__SELECTION__) == TIM_TS_NONE)))           \
    ||                                        \
    (((INSTANCE) == TIM2) &&                  \
@@ -1860,6 +1593,7 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR6) ||          \
      ((__SELECTION__) == TIM_TS_ITR7) ||          \
      ((__SELECTION__) == TIM_TS_ITR8) ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)||          \
      ((__SELECTION__) == TIM_TS_ITR11)||          \
      ((__SELECTION__) == TIM_TS_NONE)))           \
    ||                                        \
@@ -1871,6 +1605,7 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR6) ||          \
      ((__SELECTION__) == TIM_TS_ITR7) ||          \
      ((__SELECTION__) == TIM_TS_ITR8) ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)||          \
      ((__SELECTION__) == TIM_TS_NONE)))           \
    ||                                        \
    (((INSTANCE) == TIM4) &&                  \
@@ -1881,6 +1616,7 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR6) ||          \
      ((__SELECTION__) == TIM_TS_ITR7) ||          \
      ((__SELECTION__) == TIM_TS_ITR8) ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)||          \
      ((__SELECTION__) == TIM_TS_NONE)))           \
    ||                                        \
    (((INSTANCE) == TIM8) &&                  \
@@ -1891,6 +1627,7 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR6) ||          \
      ((__SELECTION__) == TIM_TS_ITR7) ||          \
      ((__SELECTION__) == TIM_TS_ITR8) ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)||          \
      ((__SELECTION__) == TIM_TS_NONE)))           \
    ||                                        \
    (((INSTANCE) == TIM15) &&                 \
@@ -1901,6 +1638,7 @@ typedef struct
      ((__SELECTION__) == TIM_TS_ITR5) ||          \
      ((__SELECTION__) == TIM_TS_ITR7) ||          \
      ((__SELECTION__) == TIM_TS_ITR8) ||          \
+     ((__SELECTION__) == TIM_TS_ITR10)||          \
      ((__SELECTION__) == TIM_TS_NONE))))
 
 #endif /* TIM5 && TIM20 */
@@ -2112,7 +1850,7 @@ HAL_TIM_ChannelStateTypeDef HAL_TIMEx_GetChannelNState(TIM_HandleTypeDef *htim, 
 /* End of exported functions -------------------------------------------------*/
 
 /* Private functions----------------------------------------------------------*/
-/** @addtogroup TIMEx_Private_Functions TIM Extended Private Functions
+/** @addtogroup TIMEx_Private_Functions TIMEx Private Functions
   * @{
   */
 void TIMEx_DMACommutationCplt(DMA_HandleTypeDef *hdma);
@@ -2136,3 +1874,5 @@ void TIMEx_DMACommutationHalfCplt(DMA_HandleTypeDef *hdma);
 
 
 #endif /* STM32G4xx_HAL_TIM_EX_H */
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

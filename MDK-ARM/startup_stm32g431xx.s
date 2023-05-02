@@ -16,13 +16,14 @@
 ;********************************************************************************
 ;* @attention
 ;*
-;* Copyright (c) 2019 STMicroelectronics.
-;* All rights reserved.
+;* <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+;* All rights reserved.</center></h2>
 ;*
-;* This software is licensed under terms that can be found in the LICENSE file
-;* in the root directory of this software component.
-;* If no LICENSE file comes with this software, it is provided AS-IS.
-;
+;* This software component is licensed by ST under BSD 3-Clause license,
+;* the "License"; You may not use this file except in compliance with the
+;* License. You may obtain a copy of the License at:
+;*                        opensource.org/licenses/BSD-3-Clause
+;*
 ;*******************************************************************************
 ;* <<< Use Configuration Wizard in Context Menu >>>
 ;
@@ -133,7 +134,7 @@ __Vectors       DCD     __initial_sp               ; Top of Stack
                 DCD     UART4_IRQHandler                  ; UART4
                 DCD     0                                 ; Reserved
                 DCD     TIM6_DAC_IRQHandler               ; TIM6 and DAC1&3 underrun errors
-                DCD     TIM7_IRQHandler                   ; TIM7
+                DCD     TIM7_DAC_IRQHandler               ; TIM7 and DAC2&4 underrun errors
                 DCD     DMA2_Channel1_IRQHandler          ; DMA2 Channel 1
                 DCD     DMA2_Channel2_IRQHandler          ; DMA2 Channel 2
                 DCD     DMA2_Channel3_IRQHandler          ; DMA2 Channel 3
@@ -295,7 +296,7 @@ Default_Handler PROC
         EXPORT     SPI3_IRQHandler                   [WEAK]
         EXPORT     UART4_IRQHandler                  [WEAK]
         EXPORT     TIM6_DAC_IRQHandler               [WEAK]
-        EXPORT     TIM7_IRQHandler                   [WEAK]
+        EXPORT     TIM7_DAC_IRQHandler               [WEAK]
         EXPORT     DMA2_Channel1_IRQHandler          [WEAK]
         EXPORT     DMA2_Channel2_IRQHandler          [WEAK]
         EXPORT     DMA2_Channel3_IRQHandler          [WEAK]
@@ -366,7 +367,7 @@ LPTIM1_IRQHandler
 SPI3_IRQHandler
 UART4_IRQHandler
 TIM6_DAC_IRQHandler
-TIM7_IRQHandler
+TIM7_DAC_IRQHandler
 DMA2_Channel1_IRQHandler
 DMA2_Channel2_IRQHandler
 DMA2_Channel3_IRQHandler
@@ -421,3 +422,4 @@ __user_initial_stackheap
 
                  END
 
+;************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE*****
