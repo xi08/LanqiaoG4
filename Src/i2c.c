@@ -1,7 +1,7 @@
 #include "i2c.h"
 #include "swDelay.h"
 
-void I2C_Init(void)
+void i2cInit(void)
 {
     uint8_t i = 9;
     while (i--)
@@ -11,7 +11,7 @@ void I2C_Init(void)
     }
 }
 
-void I2C_Start(void)
+void i2cStart(void)
 {
     LL_GPIO_SetOutputPin(SDA_GPIO_Port, SDA_Pin), delay_us(2);   // SDA=1
     LL_GPIO_SetOutputPin(SCL_GPIO_Port, SCL_Pin), delay_us(2);   // SCL=1
@@ -19,7 +19,7 @@ void I2C_Start(void)
     LL_GPIO_ResetOutputPin(SCL_GPIO_Port, SCL_Pin), delay_us(2); // SCL=0
 }
 
-void I2C_Stop(void)
+void i2cStop(void)
 {
     LL_GPIO_ResetOutputPin(SCL_GPIO_Port, SCL_Pin), delay_us(2); // SCL=0
     LL_GPIO_ResetOutputPin(SDA_GPIO_Port, SDA_Pin), delay_us(2); // SDA=0
@@ -27,7 +27,7 @@ void I2C_Stop(void)
     LL_GPIO_SetOutputPin(SDA_GPIO_Port, SDA_Pin), delay_us(2);   // SDA=1
 }
 
-uint8_t I2C_WaitACK(void)
+uint8_t i2cWaitAck(void)
 {
     uint8_t errTime = 5;
     LL_GPIO_SetOutputPin(SCL_GPIO_Port, SCL_Pin), delay_us(2); // SCL=1
@@ -36,7 +36,7 @@ uint8_t I2C_WaitACK(void)
         errTime--;
         if (!errTime)
         {
-            I2C_Stop();
+            i2cStop();
             return 1;
         }
     }
@@ -44,21 +44,21 @@ uint8_t I2C_WaitACK(void)
     return 0;
 }
 
-void I2C_SendACK(void)
+void i2cAck(void)
 {
     LL_GPIO_ResetOutputPin(SDA_GPIO_Port, SDA_Pin), delay_us(2); // SDA=0
     LL_GPIO_SetOutputPin(SCL_GPIO_Port, SCL_Pin), delay_us(2);   // SCL=1
     LL_GPIO_ResetOutputPin(SCL_GPIO_Port, SCL_Pin), delay_us(2); // SCL=0
 }
 
-void I2C_SendNAK(void)
+void i2cNak(void)
 {
     LL_GPIO_SetOutputPin(SDA_GPIO_Port, SDA_Pin), delay_us(2);   // SDA=1
     LL_GPIO_SetOutputPin(SCL_GPIO_Port, SCL_Pin), delay_us(2);   // SCL=1
     LL_GPIO_ResetOutputPin(SCL_GPIO_Port, SCL_Pin), delay_us(2); // SCL=0
 }
 
-void I2C_SendByte(uint8_t dat)
+void i2cSend(uint8_t dat)
 {
     uint8_t i = 8;
     while (i--)
@@ -74,7 +74,7 @@ void I2C_SendByte(uint8_t dat)
     LL_GPIO_ResetOutputPin(SCL_GPIO_Port, SCL_Pin), delay_us(2); // SCL=0
 }
 
-uint8_t I2C_ReadByte(void)
+uint8_t i2cRead(void)
 {
     uint8_t i = 8, dat = 0;
 

@@ -3,13 +3,13 @@
 
 #include "main.h"
 
-void I2C_Init(void);
-void I2C_Start(void);
-void I2C_Stop(void);
-uint8_t I2C_WaitACK(void);
-void I2C_SendACK(void);
-void I2C_SendNAK(void);
-void I2C_SendByte(uint8_t cSendByte);
-uint8_t I2C_ReadByte(void);
+void i2cInit(void);
+void i2cStart(void);
+void i2cStop(void);
+uint8_t i2cWaitAck(void);
+void i2cAck(void);
+void i2cNak(void);
+void i2cSend(uint8_t cSendByte);
+uint8_t i2cRead(void);
 
 #endif // !__I2C_H

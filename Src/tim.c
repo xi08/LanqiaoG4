@@ -194,6 +194,15 @@ void HAL_TIM_IC_MspDeInit(TIM_HandleTypeDef* tim_icHandle)
 }
 
 /* USER CODE BEGIN 1 */
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM2)
+    {
+    }
+    if (htim->Instance == TIM3)
+    {
+    }
+}
 
 /* USER CODE END 1 */
 

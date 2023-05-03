@@ -49,7 +49,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN PFP */
-
+void uartRxEnd(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -235,15 +235,15 @@ void TIM3_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
-  if (__HAL_UART_GET_FLAG(&huart1, UART_FLAG_IDLE))
-  {
-    __HAL_UART_CLEAR_IDLEFLAG(&huart1);
-    HAL_UART_DMAStop(&huart1);
-    uartRxEnd();
-    memset(uartBuffer, 0, sizeof(uartBuffer));
-    if (HAL_UART_Receive_DMA(&huart1, uartBuffer, sizeof(uartBuffer)) != HAL_OK)
-      Error_Handler();
-  }
+    if (__HAL_UART_GET_FLAG(&huart1, UART_FLAG_IDLE))
+    {
+        __HAL_UART_CLEAR_IDLEFLAG(&huart1);
+        HAL_UART_DMAStop(&huart1);
+        uartRxEnd();
+        memset(uartBuffer, 0, sizeof(uartBuffer));
+        if (HAL_UART_Receive_DMA(&huart1, uartBuffer, sizeof(uartBuffer)) != HAL_OK)
+            Error_Handler();
+    }
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */

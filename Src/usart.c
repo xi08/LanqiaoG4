@@ -149,6 +149,10 @@ int fputc(int ch, FILE *f)
     return ch;
 }
 
+void uartRxEnd(void)
+{
+}
+
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

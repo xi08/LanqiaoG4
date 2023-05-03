@@ -34,17 +34,15 @@ extern ADC_HandleTypeDef hadc1;
 extern ADC_HandleTypeDef hadc2;
 
 /* USER CODE BEGIN Private defines */
-extern uint16_t r37Val, r38Val, mcpVal, akyVal, traVal;
+
 /* USER CODE END Private defines */
 
 void MX_ADC1_Init(void);
 void MX_ADC2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-uint16_t adcFilter(uint16_t *adcV);
-uint8_t akyConv(uint16_t akyV);
-void adcConvCheck(void);
 void adcConvStart(void);
+void adcConvCheck(float *r37V, float *r38V, float *mcpV, float *akyV, float *traV);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

@@ -3,6 +3,7 @@
 
 #include "main.h"
 
-uint8_t DS18B20_Read(float *temp);
+uint8_t DS18B20_Start(void);
+uint8_t DS18B20_Conv(float *temp);
 
 #endif //  __DS18B20_H

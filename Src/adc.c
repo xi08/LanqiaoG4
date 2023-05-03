@@ -21,8 +21,8 @@
 #include "adc.h"
 
 /* USER CODE BEGIN 0 */
-uint16_t adc1Val[2][10], adc2Val[3][10];
-uint16_t r37Val, r38Val, mcpVal, akyVal, traVal;
+uint16_t adc1Val[10][2], adc2Val[10][3];
+
 /* USER CODE END 0 */
 
 ADC_HandleTypeDef hadc1;
@@ -69,7 +69,7 @@ void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_5;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_12CYCLES_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
@@ -81,6 +81,7 @@ void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_11;
   sConfig.Rank = ADC_REGULAR_RANK_2;
+  sConfig.SamplingTime = ADC_SAMPLETIME_92CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -116,9 +117,9 @@ void MX_ADC2_Init(void)
   }
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_13;
+  sConfig.Channel = ADC_CHANNEL_15;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_12CYCLES_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
@@ -128,8 +129,9 @@ void MX_ADC2_Init(void)
   }
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_15;
+  sConfig.Channel = ADC_CHANNEL_13;
   sConfig.Rank = ADC_REGULAR_RANK_2;
+  sConfig.SamplingTime = ADC_SAMPLETIME_24CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -138,6 +140,7 @@ void MX_ADC2_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_17;
   sConfig.Rank = ADC_REGULAR_RANK_3;
+  sConfig.SamplingTime = ADC_SAMPLETIME_92CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -302,40 +305,48 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 
 /* USER CODE BEGIN 1 */
 
-uint16_t adcFilter(uint16_t *adcV)
+uint16_t adc1Filter(uint16_t adcV[][2], size_t pos)
 {
     uint16_t minV = 0xffff, maxV = 0, sumV = 0;
     uint8_t i;
     for (i = 0; i < 10; i++)
     {
-        sumV += adcV[i];
-        minV = (minV > adcV[i] ? adcV[i] : minV);
-        maxV = (maxV < adcV[i] ? adcV[i] : maxV);
+        sumV += adcV[i][pos];
+        minV = (minV > adcV[i][pos] ? adcV[i][pos] : minV);
+        maxV = (maxV < adcV[i][pos] ? adcV[i][pos] : maxV);
     }
     return ((sumV - minV - maxV) >> 3);
 }
 
-uint8_t akyConv(uint16_t akyV)
+uint16_t adc2Filter(uint16_t adcV[][3], size_t pos)
 {
-    return 0;
+    uint16_t minV = 0xffff, maxV = 0, sumV = 0;
+    uint8_t i;
+    for (i = 0; i < 10; i++)
+    {
+        sumV += adcV[i][pos];
+        minV = (minV > adcV[i][pos] ? adcV[i][pos] : minV);
+        maxV = (maxV < adcV[i][pos] ? adcV[i][pos] : maxV);
+    }
+    return ((sumV - minV - maxV) >> 3);
 }
 
-void adcConvCheck(void)
+void adcConvCheck(float *r37V, float *r38V, float *mcpV, float *akyV, float *traV)
 {
     if (__HAL_DMA_GET_FLAG(&hdma_adc1, DMA_FLAG_TC1))
     {
         __HAL_DMA_CLEAR_FLAG(&hdma_adc1, DMA_FLAG_TC1);
-        mcpVal = adcFilter(adc1Val[0]);
-        r38Val = adcFilter(adc1Val[1]);
+        (*mcpV) = adc1Filter(adc1Val, 0) * 3.3 / 4095;
+        (*r38V) = adc1Filter(adc1Val, 1) * 3.3 / 4095;
     }
 
     // Check ADC2 DMA
     if (__HAL_DMA_GET_FLAG(&hdma_adc2, DMA_FLAG_TC2))
     {
         __HAL_DMA_CLEAR_FLAG(&hdma_adc2, DMA_FLAG_TC2);
-        akyVal = adcFilter(adc2Val[0]);
-        r37Val = adcFilter(adc2Val[1]);
-        traVal = adcFilter(adc2Val[2]);
+        (*akyV) = adc2Filter(adc2Val, 0) * 3.3 / 4095;
+        (*r37V) = adc2Filter(adc2Val, 1) * 3.3 / 4095;
+        (*traV) = adc2Filter(adc2Val, 2) * 3.3 / 4095;
     }
 }
 

@@ -75,7 +75,7 @@ typedef enum
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-void uartRxEnd(void);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

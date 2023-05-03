@@ -19,7 +19,7 @@ uint8_t DS18B20_Reset(void)
     return dat;
 }
 
-void DS18B20_WriteByte(uint8_t dat)
+void DS18B20_Send(uint8_t dat)
 {
     uint8_t i;
     for (i = 0; i < 8; i++)
@@ -36,7 +36,7 @@ void DS18B20_WriteByte(uint8_t dat)
     }
 }
 
-uint8_t DS18B20_ReadByte(void)
+uint8_t DS18B20_Read(void)
 {
     uint8_t i, result = 0;
     for (i = 0; i < 8; i++)
@@ -70,40 +70,40 @@ uint8_t DS18B20_CRC(uint8_t *dataBlock, size_t blockSize)
     return crc;
 }
 
-uint8_t DS18B20_Read(float *temp)
+uint8_t DS18B20_Start(void)
 {
-    uint8_t i, errTime;
-    int16_t t;
+    uint8_t errTime = 6;
 
-    // Start convert
-    errTime = 6;
     while (--errTime)
     {
         if (!DS18B20_Reset())
             continue;
 
-        DS18B20_WriteByte(0xcc);
-        DS18B20_WriteByte(0x44);
+        DS18B20_Send(0xcc);
+        DS18B20_Send(0x44);
         break;
     }
     if (!errTime)
         return 1;
+    return 0;
+}
 
-    // Delay time
-    HAL_Delay(775);
+uint8_t DS18B20_Conv(float *temp)
+{
+    uint8_t i, errTime = 6;
+    int16_t t;
 
     // Read data
-    errTime = 6;
     while (--errTime)
     {
         if (!DS18B20_Reset())
             continue;
 
-        DS18B20_WriteByte(0xcc);
-        DS18B20_WriteByte(0xbe);
+        DS18B20_Send(0xcc);
+        DS18B20_Send(0xbe);
 
         for (i = 0; i < 9; i++)
-            DS18B20_buffer[i] = DS18B20_ReadByte();
+            DS18B20_buffer[i] = DS18B20_Read();
 
         if (DS18B20_CRC(DS18B20_buffer, 8) == DS18B20_buffer[8])
             break;
@@ -116,7 +116,7 @@ uint8_t DS18B20_Read(float *temp)
     t <<= 8;
     t |= DS18B20_buffer[0];
 
-    // Output data
+    // Convert data
     (*temp) = t * 1.0 / 16;
 
     return 0;
