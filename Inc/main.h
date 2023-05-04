@@ -75,7 +75,9 @@ typedef enum
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void keyProg(void);
+void setup(void);
+void loop(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

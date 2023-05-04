@@ -54,8 +54,7 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-void setup(void);
-void loop(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/

@@ -1,7 +1,7 @@
 #include "ds18b20.h"
 #include "swDelay.h"
 
-uint8_t DS18B20_buffer[9];
+uint8_t DS18B20_buffer[9], DS18B20_Resolution;
 
 uint8_t DS18B20_Reset(void)
 {
@@ -70,7 +70,7 @@ uint8_t DS18B20_CRC(uint8_t *dataBlock, size_t blockSize)
     return crc;
 }
 
-uint8_t DS18B20_Start(void)
+uint8_t DS18B20_Start(uint8_t Res)
 {
     uint8_t errTime = 6;
 
@@ -80,11 +80,16 @@ uint8_t DS18B20_Start(void)
             continue;
 
         DS18B20_Send(0xcc);
-        DS18B20_Send(0x44);
+        DS18B20_Send(0x4e);
+        DS18B20_Send(100);
+        DS18B20_Send(0);
+        DS18B20_Send(0x1f | ((Res - 9) << 5));
         break;
     }
     if (!errTime)
         return 1;
+
+    DS18B20_Resolution = 12 - Res;
     return 0;
 }
 
@@ -117,7 +122,8 @@ uint8_t DS18B20_Conv(float *temp)
     t |= DS18B20_buffer[0];
 
     // Convert data
-    (*temp) = t * 1.0 / 16;
+    t >>= DS18B20_Resolution;
+    (*temp) = t * 1.0 / (1 << (4 - DS18B20_Resolution));
 
     return 0;
 }

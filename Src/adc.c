@@ -344,8 +344,8 @@ void adcConvCheck(float *r37V, float *r38V, float *mcpV, float *akyV, float *tra
     if (__HAL_DMA_GET_FLAG(&hdma_adc2, DMA_FLAG_TC2))
     {
         __HAL_DMA_CLEAR_FLAG(&hdma_adc2, DMA_FLAG_TC2);
-        (*akyV) = adc2Filter(adc2Val, 0) * 3.3 / 4095;
-        (*r37V) = adc2Filter(adc2Val, 1) * 3.3 / 4095;
+        (*r37V) = adc2Filter(adc2Val, 0) * 3.3 / 4095;
+        (*akyV) = adc2Filter(adc2Val, 1) * 3.3 / 4095;
         (*traV) = adc2Filter(adc2Val, 2) * 3.3 / 4095;
     }
 }
