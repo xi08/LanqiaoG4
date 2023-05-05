@@ -34,7 +34,7 @@ sMode_t sMode = sMode_M4;
 char sModeText[6] = "M4", kModeText[11] = "MCP";
 
 uint8_t akyNum;
-uint16_t r39Freq, r40Freq;
+extern uint16_t r39Freq, r40Freq;
 
 uint8_t MCP_CFGVal;
 
@@ -76,6 +76,8 @@ void setup(void)
     sprintf((char *)dispBuffer, "%s,%s", __TIME__, __DATE__);
     LCD_DisplayStringLine(Line2, dispBuffer);
 
+    HAL_Delay(1500);
+
     // ADC start
     adcConvStart();
 
@@ -84,7 +86,13 @@ void setup(void)
         Error_Handler();
     __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
 
-    HAL_Delay(1500);
+    // R40 InputCapture start
+    if (HAL_TIM_IC_Start_IT(&htim8, TIM_CHANNEL_1) != HAL_OK)
+        Error_Handler();
+
+    // R39 InputCapture start
+    if (HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1) != HAL_OK)
+        Error_Handler();
 
     // Clear display
     segSend(seg7Mask[16], seg7Mask[16], seg7Mask[16]);
