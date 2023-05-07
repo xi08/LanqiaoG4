@@ -42,7 +42,8 @@ void MX_ADC2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 void adcConvStart(void);
-void adcConvCheck(float *r37V, float *r38V, float *mcpV, float *akyV, float *traV);
+void adcConvCheck(float *r37V, float *r38V, float *mcpV, float *ao1, float *ao2);
+uint8_t akyConv(float akyV);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

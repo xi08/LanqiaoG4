@@ -361,6 +361,27 @@ void adcConvStart(void)
         Error_Handler();
 }
 
+uint8_t akyConv(float akyV)
+{
+    if (akyV > 3.2)
+        return 0;
+    if (akyV > 3.1)
+        return 8;
+    if (akyV > 2.7)
+        return 7;
+    if (akyV > 2.2)
+        return 6;
+    if (akyV > 1.8)
+        return 5;
+    if (akyV > 1.3)
+        return 4;
+    if (akyV > 0.8)
+        return 3;
+    if (akyV > 0.3)
+        return 2;
+    return 1;
+}
+
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

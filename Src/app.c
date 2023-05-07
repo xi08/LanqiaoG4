@@ -109,6 +109,7 @@ void loop(void)
 
     // Key Scan & AKEY Conv.
     keyScan();
+    akyNum = akyConv(akyVal);
 
     // MCP4017 Read
     MCP_CFGVal = mcpRead();
@@ -493,3 +494,5 @@ void keyProg(void)
         LCD_DisplayStringLine(Line9, dispBuffer);
     }
 }
+
+
