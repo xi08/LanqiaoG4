@@ -87,6 +87,18 @@ void loop(void);
 #define LD6_GPIO_Port GPIOC
 #define LD7_Pin LL_GPIO_PIN_15
 #define LD7_GPIO_Port GPIOC
+#define OSCI_Pin LL_GPIO_PIN_0
+#define OSCI_GPIO_Port GPIOF
+#define OSCO_Pin LL_GPIO_PIN_1
+#define OSCO_GPIO_Port GPIOF
+#define LC0_Pin LL_GPIO_PIN_0
+#define LC0_GPIO_Port GPIOC
+#define LC1_Pin LL_GPIO_PIN_1
+#define LC1_GPIO_Port GPIOC
+#define LC2_Pin LL_GPIO_PIN_2
+#define LC2_GPIO_Port GPIOC
+#define LC3_Pin LL_GPIO_PIN_3
+#define LC3_GPIO_Port GPIOC
 #define B4_Pin LL_GPIO_PIN_0
 #define B4_GPIO_Port GPIOA
 #define SER_Pin LL_GPIO_PIN_1
@@ -103,6 +115,10 @@ void loop(void);
 #define OWD_GPIO_Port GPIOA
 #define DHT_Pin LL_GPIO_PIN_7
 #define DHT_GPIO_Port GPIOA
+#define LC4_Pin LL_GPIO_PIN_4
+#define LC4_GPIO_Port GPIOC
+#define LC5_Pin LL_GPIO_PIN_5
+#define LC5_GPIO_Port GPIOC
 #define B1_Pin LL_GPIO_PIN_0
 #define B1_GPIO_Port GPIOB
 #define B2_Pin LL_GPIO_PIN_1
@@ -115,14 +131,24 @@ void loop(void);
 #define MCP_GPIO_Port GPIOB
 #define R37_Pin LL_GPIO_PIN_15
 #define R37_GPIO_Port GPIOB
+#define LC6_Pin LL_GPIO_PIN_6
+#define LC6_GPIO_Port GPIOC
+#define LC7_Pin LL_GPIO_PIN_7
+#define LC7_GPIO_Port GPIOC
 #define LD0_Pin LL_GPIO_PIN_8
 #define LD0_GPIO_Port GPIOC
 #define LD1_Pin LL_GPIO_PIN_9
 #define LD1_GPIO_Port GPIOC
+#define nRD_Pin LL_GPIO_PIN_8
+#define nRD_GPIO_Port GPIOA
 #define TXD_Pin LL_GPIO_PIN_9
 #define TXD_GPIO_Port GPIOA
 #define RXD_Pin LL_GPIO_PIN_10
 #define RXD_GPIO_Port GPIOA
+#define SWDIO_Pin LL_GPIO_PIN_13
+#define SWDIO_GPIO_Port GPIOA
+#define SWCLK_Pin LL_GPIO_PIN_14
+#define SWCLK_GPIO_Port GPIOA
 #define R40_Pin LL_GPIO_PIN_15
 #define R40_GPIO_Port GPIOA
 #define LD2_Pin LL_GPIO_PIN_10
@@ -135,10 +161,16 @@ void loop(void);
 #define LE_GPIO_Port GPIOD
 #define R39_Pin LL_GPIO_PIN_4
 #define R39_GPIO_Port GPIOB
+#define nWR_Pin LL_GPIO_PIN_5
+#define nWR_GPIO_Port GPIOB
 #define SCL_Pin LL_GPIO_PIN_6
 #define SCL_GPIO_Port GPIOB
 #define SDA_Pin LL_GPIO_PIN_7
 #define SDA_GPIO_Port GPIOB
+#define RS_Pin LL_GPIO_PIN_8
+#define RS_GPIO_Port GPIOB
+#define nCS_Pin LL_GPIO_PIN_9
+#define nCS_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

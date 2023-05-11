@@ -5,7 +5,7 @@
 #include "gpio.h"
 #include "i2c.h"
 #include "i2cDevice.h"
-#include "lcd.h"
+#include "ldrv.h"
 #include "main.h"
 #include "seg7.h"
 #include "tim.h"
@@ -39,7 +39,7 @@ extern uint16_t r39Freq, r40Freq;
 uint8_t MCP_CFGVal;
 
 uint32_t sTimerTS_lcdRefresh;
-uint8_t dispBuffer[21];
+char dispBuffer[21];
 
 uint32_t sTimerTS_dht11Refresh;
 float DHT11_Temp, DHT11_Humi;
@@ -59,8 +59,9 @@ void setup(void)
     bootTime = bootCheck();
 
     // LCD init.
-    LCD_Init(), LCD_Clear(Black);
-    LCD_SetTextColor(White), LCD_SetBackColor(Black);
+    lcdInit(lcdDispFR_50);
+    lcdSetFrontColor(0xffff), lcdSetBackColor(0x0000);
+    lcdClearScreen();
 
     // LED init.
     ledUpdate(bootTime);
@@ -70,11 +71,11 @@ void setup(void)
     segSend(seg7Mask[bootTime / 100], seg7Mask[(bootTime / 10) % 10], seg7Mask[bootTime % 10]);
 
     // Display boot info.
-    sprintf((char *)dispBuffer, "CT117E-M4  Boot=%u", bootTime);
-    LCD_DisplayStringLine(Line0, dispBuffer);
-    LCD_DisplayStringLine(Line1, (uint8_t *)"Compiled in");
-    sprintf((char *)dispBuffer, "%s,%s", __TIME__, __DATE__);
-    LCD_DisplayStringLine(Line2, dispBuffer);
+    sprintf(dispBuffer, "CT117E-M4  Boot=%u", bootTime);
+    lcdDisplayString(Line0, dispBuffer);
+    lcdDisplayString(Line1, "Compiled in");
+    sprintf(dispBuffer, "%s,%s", __TIME__, __DATE__);
+    lcdDisplayString(Line2, dispBuffer);
 
     HAL_Delay(1500);
 
@@ -96,7 +97,7 @@ void setup(void)
 
     // Clear display
     segSend(seg7Mask[16], seg7Mask[16], seg7Mask[16]);
-    LCD_Clear(Black);
+    lcdClearScreen();
     ledUpdate(0);
     sTimerTS_lcdRefresh = HAL_GetTick();
 }
@@ -115,19 +116,18 @@ void loop(void)
     MCP_CFGVal = mcpRead();
 #ifdef CT117EXA
     // DHT11 Read
-    if (HAL_GetTick() - sTimerTS_dht11Refresh > 2500)
+    if (HAL_GetTick() - sTimerTS_dht11Refresh > 2000)
     {
         sTimerTS_dht11Refresh = HAL_GetTick();
         errTime = 5;
         while (DHT11_ReadData(&DHT11_Humi, &DHT11_Temp) || !errTime)
             errTime--;
-
         if (!errTime)
             Error_Handler();
     }
 
     // DS18B20 Read
-    if (HAL_GetTick() - sTimerTS_ds18b20Update > 800)
+    if (HAL_GetTick() - sTimerTS_ds18b20Update > 750)
     {
         sTimerTS_ds18b20Update = HAL_GetTick();
         errTime = 5;
@@ -163,48 +163,48 @@ void loop(void)
     segSend((seg7Mask[segPos[0]] | segDP[0]), (seg7Mask[segPos[1]] | segDP[1]), (seg7Mask[segPos[2]] | segDP[2]));
 
     // LCD Display
-    if (HAL_GetTick() - sTimerTS_lcdRefresh > 50)
+    if (HAL_GetTick() - sTimerTS_lcdRefresh > 18)
     {
         sTimerTS_lcdRefresh = HAL_GetTick();
 
         printf("\n");
 
-        LCD_ClearLine(Line0);
-        sprintf((char *)dispBuffer, "S=%s,K=%s", sModeText, kModeText);
-        LCD_DisplayStringLine(Line0, dispBuffer), printf("%s\n", dispBuffer);
+        lcdClearLine(Line0);
+        sprintf(dispBuffer, "S=%s,K=%s", sModeText, kModeText);
+        lcdDisplayString(Line0, dispBuffer), printf("%s\n", dispBuffer);
         switch (sMode)
         {
         case sMode_M4:
-            LCD_ClearLine(Line1);
-            sprintf((char *)dispBuffer, "A1=%1.2fV,F1=%uHz", r37Val, r39Freq);
-            LCD_DisplayStringLine(Line1, dispBuffer), printf("%s\n", dispBuffer);
+            lcdClearLine(Line1);
+            sprintf(dispBuffer, "A1=%1.2fV,F1=%uHz", r37Val, r39Freq);
+            lcdDisplayString(Line1, dispBuffer), printf("%s\n", dispBuffer);
 
-            LCD_ClearLine(Line2);
-            sprintf((char *)dispBuffer, "A2=%1.2fV,F2=%uHz", r38Val, r40Freq);
-            LCD_DisplayStringLine(Line2, dispBuffer), printf("%s\n", dispBuffer);
+            lcdClearLine(Line2);
+            sprintf(dispBuffer, "A2=%1.2fV,F2=%uHz", r38Val, r40Freq);
+            lcdDisplayString(Line2, dispBuffer), printf("%s\n", dispBuffer);
 
-            LCD_ClearLine(Line3);
-            sprintf((char *)dispBuffer, "Res=%1.2fV,%.2fKOhm", mcpVal, MCP_CFGVal * 0.7874);
-            LCD_DisplayStringLine(Line3, dispBuffer), printf("%s\n", dispBuffer);
+            lcdClearLine(Line3);
+            sprintf(dispBuffer, "Res=%1.2fV,%.2fKOhm", mcpVal, MCP_CFGVal * 0.7874);
+            lcdDisplayString(Line3, dispBuffer), printf("%s\n", dispBuffer);
 
             break;
         case sMode_EXA:
-            LCD_ClearLine(Line1);
-            sprintf((char *)dispBuffer, "AKY=%1.2fV,%u", akyVal, akyNum);
-            LCD_DisplayStringLine(Line1, dispBuffer), printf("%s\n", dispBuffer);
+            lcdClearLine(Line1);
+            sprintf(dispBuffer, "AKY=%1.2fV,%u", akyVal, akyNum);
+            lcdDisplayString(Line1, dispBuffer), printf("%s\n", dispBuffer);
 
-            LCD_ClearLine(Line2);
-            sprintf((char *)dispBuffer, "TR=%1.2fV,DS=%2.1f,%ub", traVal, DS18B20_Temp, DS18B20_Res);
-            LCD_DisplayStringLine(Line2, dispBuffer), printf("%s\n", dispBuffer);
+            lcdClearLine(Line2);
+            sprintf(dispBuffer, "TR=%1.2fV,DS=%2.1f,%ub", traVal, DS18B20_Temp, DS18B20_Res);
+            lcdDisplayString(Line2, dispBuffer), printf("%s\n", dispBuffer);
 
-            LCD_ClearLine(Line3);
-            sprintf((char *)dispBuffer, "DHT=%2.1f,%2.1f%%", DHT11_Temp, DHT11_Humi);
-            LCD_DisplayStringLine(Line3, dispBuffer), printf("%s\n", dispBuffer);
+            lcdClearLine(Line3);
+            sprintf(dispBuffer, "DHT=%2.1f,%2.1f%%", DHT11_Temp, DHT11_Humi);
+            lcdDisplayString(Line3, dispBuffer), printf("%s\n", dispBuffer);
 
-            LCD_ClearLine(Line4);
-            sprintf((char *)dispBuffer, "SEG=%x%s%x%s%x%s,CHG=%u", segPos[0], (segDP[0] ? "." : ""), segPos[1],
+            lcdClearLine(Line4);
+            sprintf(dispBuffer, "SEG=%x%s%x%s%x%s,CHG=%u", segPos[0], (segDP[0] ? "." : ""), segPos[1],
                     (segDP[1] ? "." : ""), segPos[2], (segDP[2] ? "." : ""), (segCP + 1));
-            LCD_DisplayStringLine(Line4, dispBuffer), printf("%s\n", dispBuffer);
+            lcdDisplayString(Line4, dispBuffer), printf("%s\n", dispBuffer);
 
             break;
         default:
@@ -248,9 +248,9 @@ void keyProg(void)
         }
 
         // disp.
-        LCD_ClearLine(Line9);
-        sprintf((char *)dispBuffer, "K%s,%s", "1S", "keyMode Change");
-        LCD_DisplayStringLine(Line9, dispBuffer);
+        lcdClearLine(Line9);
+        sprintf(dispBuffer, "K%s,%s", "1S", "keyMode Change");
+        lcdDisplayString(Line9, dispBuffer);
     }
 
     /* B1 Long */
@@ -265,13 +265,13 @@ void keyProg(void)
         case sMode_M4:
             sMode = sMode_EXA;
             sprintf(sModeText, "EXA");
-            LCD_Clear(Black);
+            lcdClearScreen();
             sTimerTS_lcdRefresh = HAL_GetTick();
             break;
         case sMode_EXA:
             sMode = sMode_M4;
             sprintf(sModeText, "M4");
-            LCD_Clear(Black);
+            lcdClearScreen();
             sTimerTS_lcdRefresh = HAL_GetTick();
             break;
         default:
@@ -280,9 +280,9 @@ void keyProg(void)
         }
 
         // disp.
-        LCD_ClearLine(Line9);
-        sprintf((char *)dispBuffer, "K%s,%s", "1L", "sysMode Change");
-        LCD_DisplayStringLine(Line9, dispBuffer);
+        lcdClearLine(Line9);
+        sprintf(dispBuffer, "K%s,%s", "1L", "sysMode Change");
+        lcdDisplayString(Line9, dispBuffer);
     }
 
     /* B2 Short */
@@ -300,9 +300,9 @@ void keyProg(void)
         }
 
         // disp.
-        LCD_ClearLine(Line9);
-        sprintf((char *)dispBuffer, "K%s,%s", "2S", modeDbuf);
-        LCD_DisplayStringLine(Line9, dispBuffer);
+        lcdClearLine(Line9);
+        sprintf(dispBuffer, "K%s,%s", "2S", modeDbuf);
+        lcdDisplayString(Line9, dispBuffer);
     }
 
     /* B2 Long */
@@ -320,9 +320,9 @@ void keyProg(void)
         }
 
         // disp.
-        LCD_ClearLine(Line9);
-        sprintf((char *)dispBuffer, "K%s,%s", "2L", modeDbuf);
-        LCD_DisplayStringLine(Line9, dispBuffer);
+        lcdClearLine(Line9);
+        sprintf(dispBuffer, "K%s,%s", "2L", modeDbuf);
+        lcdDisplayString(Line9, dispBuffer);
     }
 
     /* B3 Short */
@@ -363,9 +363,9 @@ void keyProg(void)
         }
 
         // disp.
-        LCD_ClearLine(Line9);
-        sprintf((char *)dispBuffer, "K%s,%s", "3S", modeDbuf);
-        LCD_DisplayStringLine(Line9, dispBuffer);
+        lcdClearLine(Line9);
+        sprintf(dispBuffer, "K%s,%s", "3S", modeDbuf);
+        lcdDisplayString(Line9, dispBuffer);
 
         // act.
     }
@@ -407,9 +407,9 @@ void keyProg(void)
         }
 
         // disp.
-        LCD_ClearLine(Line9);
-        sprintf((char *)dispBuffer, "K%s,%s", "3L", modeDbuf);
-        LCD_DisplayStringLine(Line9, dispBuffer);
+        lcdClearLine(Line9);
+        sprintf(dispBuffer, "K%s,%s", "3L", modeDbuf);
+        lcdDisplayString(Line9, dispBuffer);
     }
 
     /* B4 Short */
@@ -450,10 +450,10 @@ void keyProg(void)
         }
 
         // disp.
-        LCD_ClearLine(Line9);
+        lcdClearLine(Line9);
 
-        sprintf((char *)dispBuffer, "K%s,%s", "4S", modeDbuf);
-        LCD_DisplayStringLine(Line9, dispBuffer);
+        sprintf(dispBuffer, "K%s,%s", "4S", modeDbuf);
+        lcdDisplayString(Line9, dispBuffer);
     }
 
     /* B4 Long */
@@ -489,10 +489,8 @@ void keyProg(void)
         }
 
         // disp.
-        LCD_ClearLine(Line9);
-        sprintf((char *)dispBuffer, "K%s,%s", "4L", modeDbuf);
-        LCD_DisplayStringLine(Line9, dispBuffer);
+        lcdClearLine(Line9);
+        sprintf(dispBuffer, "K%s,%s", "4L", modeDbuf);
+        lcdDisplayString(Line9, dispBuffer);
     }
 }
-
-

@@ -78,18 +78,28 @@ uint8_t DS18B20_Start(uint8_t Res)
     {
         if (!DS18B20_Reset())
             continue;
-
         DS18B20_Send(0xcc);
         DS18B20_Send(0x4e);
-        DS18B20_Send(100);
+        DS18B20_Send(0);
         DS18B20_Send(0);
         DS18B20_Send(0x1f | ((Res - 9) << 5));
         break;
     }
     if (!errTime)
         return 1;
-
     DS18B20_Resolution = 12 - Res;
+
+    errTime = 6;
+    while (--errTime)
+    {
+        if (!DS18B20_Reset())
+            continue;
+        DS18B20_Send(0xcc);
+        DS18B20_Send(0x44);
+        break;
+    }
+    if (!errTime)
+        return 2;
     return 0;
 }
 
