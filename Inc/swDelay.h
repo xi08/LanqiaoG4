@@ -2,8 +2,7 @@
 
 #include "main.h"
 
-#define delay_us(x) swDelay5((x)*80 / 5)
-#define delay_1WireFast(x) swDelay5((x)*80 / 20)
+#define delay_us(x) swDelay5((x)*170 / 5)
 
 void swDelay5(uint32_t n);
 

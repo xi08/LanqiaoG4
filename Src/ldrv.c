@@ -1,10 +1,11 @@
 #include "ldrv.h"
 #include "lfont.h"
-#include "swDelay.h"
 
 uint16_t lcdBackColor = 0x0000, lcdFrontColor = 0xffff;
 
-#define i80Delay() (__nop(), __nop(), __nop())
+#define lcdDelay() (__nop(), __nop(), __nop(), __nop(), __nop(), __nop(), __nop())
+#define lcdDelayL(t) (HAL_Delay(t))
+
 /* Bus Control Function */
 /**
  * @brief Set bus to input mode
@@ -71,14 +72,14 @@ void lcdWriteReg(uint8_t regAddr, uint16_t regVal)
     LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
     LL_GPIO_WriteOutputPort(LC0_GPIO_Port, regAddr);
     LL_GPIO_ResetOutputPin(nWR_GPIO_Port, nWR_Pin);
-    i80Delay();
+    lcdDelay();
     LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
 
     LL_GPIO_SetOutputPin(RS_GPIO_Port, RS_Pin);
     LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
     LL_GPIO_WriteOutputPort(LC0_GPIO_Port, regVal);
     LL_GPIO_ResetOutputPin(nWR_GPIO_Port, nWR_Pin);
-    i80Delay();
+    lcdDelay();
     LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
 
     LL_GPIO_SetOutputPin(nCS_GPIO_Port, nCS_Pin);
@@ -100,13 +101,13 @@ uint16_t lcdReadReg(uint8_t regAddr)
     LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
     LL_GPIO_WriteOutputPort(LC0_GPIO_Port, regAddr);
     LL_GPIO_ResetOutputPin(nWR_GPIO_Port, nWR_Pin);
-    i80Delay();
+    lcdDelay();
     LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
 
     LL_GPIO_ResetOutputPin(RS_GPIO_Port, RS_Pin);
     lcdBusI();
     LL_GPIO_ResetOutputPin(nRD_GPIO_Port, nRD_Pin);
-    i80Delay();
+    lcdDelay();
     dat = LL_GPIO_ReadInputPort(LC0_GPIO_Port);
     LL_GPIO_SetOutputPin(nRD_GPIO_Port, nRD_Pin);
     lcdBusO();
@@ -132,7 +133,7 @@ void lcdWriteRAM(uint16_t *RGBcode, uint16_t dataSize)
     LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
     LL_GPIO_WriteOutputPort(LC0_GPIO_Port, 0x22);
     LL_GPIO_ResetOutputPin(nWR_GPIO_Port, nWR_Pin);
-    i80Delay();
+    lcdDelay();
     LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
 
     for (i = 0; i < dataSize; i++)
@@ -141,7 +142,7 @@ void lcdWriteRAM(uint16_t *RGBcode, uint16_t dataSize)
         LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
         LL_GPIO_WriteOutputPort(LC0_GPIO_Port, RGBcode[i]);
         LL_GPIO_ResetOutputPin(nWR_GPIO_Port, nWR_Pin);
-        i80Delay();
+        lcdDelay();
         LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
     }
 
@@ -160,7 +161,7 @@ void lcdWriteRAM0(void)
     LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
     LL_GPIO_WriteOutputPort(LC0_GPIO_Port, 0x22);
     LL_GPIO_ResetOutputPin(nWR_GPIO_Port, nWR_Pin);
-    i80Delay();
+    lcdDelay();
     LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
 }
 
@@ -175,7 +176,7 @@ void lcdWriteRAM1(uint16_t RGBcode)
     LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
     LL_GPIO_WriteOutputPort(LC0_GPIO_Port, RGBcode);
     LL_GPIO_ResetOutputPin(nWR_GPIO_Port, nWR_Pin);
-    i80Delay();
+    lcdDelay();
     LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
 }
 
@@ -204,13 +205,13 @@ void lcdReadRAM(uint16_t *RGBcode, uint16_t dataSize)
     LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
     LL_GPIO_WriteOutputPort(LC0_GPIO_Port, 0x22);
     LL_GPIO_ResetOutputPin(nWR_GPIO_Port, nWR_Pin);
-    i80Delay();
+    lcdDelay();
     LL_GPIO_SetOutputPin(nWR_GPIO_Port, nWR_Pin);
 
     lcdBusI();
     LL_GPIO_SetOutputPin(RS_GPIO_Port, RS_Pin);
     LL_GPIO_ResetOutputPin(nRD_GPIO_Port, nRD_Pin);
-    i80Delay();
+    lcdDelay();
     LL_GPIO_ReadInputPort(LC0_GPIO_Port);
     LL_GPIO_SetOutputPin(nRD_GPIO_Port, nRD_Pin);
 
@@ -218,7 +219,7 @@ void lcdReadRAM(uint16_t *RGBcode, uint16_t dataSize)
     {
         LL_GPIO_SetOutputPin(RS_GPIO_Port, RS_Pin);
         LL_GPIO_ResetOutputPin(nRD_GPIO_Port, nRD_Pin);
-        i80Delay();
+        lcdDelay();
         RGBcode[i] = LL_GPIO_ReadInputPort(LC0_GPIO_Port);
         LL_GPIO_SetOutputPin(nRD_GPIO_Port, nRD_Pin);
     }
@@ -243,15 +244,15 @@ void lcdInit_932x(lcdDispFR_t lfr)
     lcdWriteReg(0x11, 0x0007); // Set power control
     lcdWriteReg(0x12, 0x0000); // Set power control
     lcdWriteReg(0x13, 0x0000); // Set power control
-    HAL_Delay(200);            // Set power control
+    lcdDelayL(200);            // Set power control
     lcdWriteReg(0x10, 0x1690); // Set power control
     lcdWriteReg(0x11, 0x0227); // Set power control
-    HAL_Delay(50);             // Set power control
+    lcdDelayL(50);             // Set power control
     lcdWriteReg(0x12, 0x001d); // Set power control
-    HAL_Delay(50);             // Set power control
+    lcdDelayL(50);             // Set power control
     lcdWriteReg(0x13, 0x0800); // Set power control
     lcdWriteReg(0x29, 0x0014); // Set power control
-    HAL_Delay(50);             // Set power control
+    lcdDelayL(50);             // Set power control
 
     lcdWriteReg(0x30, 0x0007); // Adjust the gamma curve
     lcdWriteReg(0x31, 0x0707); // Adjust the gamma curve
@@ -298,7 +299,7 @@ void lcdInit_932x(lcdDispFR_t lfr)
 void lcdInit_8230(void)
 {
     lcdWriteReg(0x00, 0x0001); // Start auto power-up
-    HAL_Delay(40);
+    lcdDelayL(40);
 
     lcdWriteReg(0x10, 0x1790); // Set power control
     lcdWriteReg(0x12, 0x80fe); // Set power control

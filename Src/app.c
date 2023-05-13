@@ -221,7 +221,7 @@ void keyProg(void)
     if (keyState[0] == S2)
     {
         // reset state
-        keyState[1] = S0;
+        keyState[0] = S0;
 
         // act.
         switch (kMode)
@@ -289,7 +289,7 @@ void keyProg(void)
     if (keyState[1] == S2)
     {
         // reset state
-        keyState[0] = S0;
+        keyState[1] = S0;
 
         // act.
         switch (kMode)

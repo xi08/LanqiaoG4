@@ -112,9 +112,6 @@ void MX_GPIO_Init(void)
   LL_GPIO_ResetOutputPin(LE_GPIO_Port, LE_Pin);
 
   /**/
-  LL_GPIO_ResetOutputPin(RS_GPIO_Port, RS_Pin);
-
-  /**/
   LL_GPIO_SetOutputPin(OWD_GPIO_Port, OWD_Pin);
 
   /**/
@@ -131,6 +128,9 @@ void MX_GPIO_Init(void)
 
   /**/
   LL_GPIO_SetOutputPin(SDA_GPIO_Port, SDA_Pin);
+
+  /**/
+  LL_GPIO_SetOutputPin(RS_GPIO_Port, RS_Pin);
 
   /**/
   LL_GPIO_SetOutputPin(nCS_GPIO_Port, nCS_Pin);
