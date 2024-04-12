@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2023 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2024 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
@@ -399,6 +399,7 @@ void ledUpdate(uint8_t led)
 void keyScan(void)
 {
     uint8_t keyInfo[4], i;
+    uint32_t nowTick=HAL_GetTick();
     keyInfo[0] = LL_GPIO_IsInputPinSet(B1_GPIO_Port, B1_Pin);
     keyInfo[1] = LL_GPIO_IsInputPinSet(B2_GPIO_Port, B2_Pin);
     keyInfo[2] = LL_GPIO_IsInputPinSet(B3_GPIO_Port, B3_Pin);
@@ -411,9 +412,9 @@ void keyScan(void)
             switch (keyState[i])
             {
             case S1:
-                if (HAL_GetTick() - keyScanTS[i] >= 800)
+                if (nowTick - keyScanTS[i] >= 800)
                     keyState[i] = S4;
-                else if (HAL_GetTick() - keyScanTS[i] >= 50)
+                else if (nowTick - keyScanTS[i] >= 50)
                     keyState[i] = S2;
                 else
                     keyState[i] = S0;
@@ -429,7 +430,7 @@ void keyScan(void)
             {
             case S0:
                 keyState[i] = S1;
-                keyScanTS[i] = HAL_GetTick();
+                keyScanTS[i] = nowTick;
                 break;
             default:
                 keyState[i] = keyState[i];

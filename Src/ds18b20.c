@@ -1,5 +1,4 @@
 #include "ds18b20.h"
-#include "swDelay.h"
 
 uint8_t DS18B20_buffer[9], DS18B20_Resolution;
 

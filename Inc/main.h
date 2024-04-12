@@ -68,7 +68,7 @@ typedef enum
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
+#define delay_us(x) swDelay6((x)*170 / 6)
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -78,6 +78,12 @@ void Error_Handler(void);
 void keyProg(void);
 void setup(void);
 void loop(void);
+static inline void swDelay6(uint32_t n)
+{
+    while (n--)
+        __NOP();
+}
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

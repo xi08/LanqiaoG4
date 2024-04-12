@@ -59,7 +59,7 @@ void setup(void)
     bootTime = bootCheck();
 
     // LCD init.
-    lcdInit(lcdDispFR_50);
+    lcdInit(lcdDispFR_90);
     lcdSetFrontColor(0xffff), lcdSetBackColor(0x0000);
     lcdClearScreen();
 
@@ -105,6 +105,7 @@ void setup(void)
 void loop(void)
 {
     uint8_t errTime;
+    uint32_t nowTick;
     // Check ADC Conv. Value
     adcConvCheck(&r37Val, &r38Val, &mcpVal, &akyVal, &traVal);
 
@@ -116,9 +117,10 @@ void loop(void)
     MCP_CFGVal = mcpRead();
 #ifdef CT117EXA
     // DHT11 Read
-    if (HAL_GetTick() - sTimerTS_dht11Refresh > 2000)
+    nowTick=HAL_GetTick();
+    if (nowTick - sTimerTS_dht11Refresh > 2000)
     {
-        sTimerTS_dht11Refresh = HAL_GetTick();
+        sTimerTS_dht11Refresh = nowTick;
         errTime = 5;
         while (DHT11_ReadData(&DHT11_Humi, &DHT11_Temp) || !errTime)
             errTime--;
@@ -127,9 +129,10 @@ void loop(void)
     }
 
     // DS18B20 Read
-    if (HAL_GetTick() - sTimerTS_ds18b20Update > 750)
+    nowTick=HAL_GetTick();
+    if (nowTick - sTimerTS_ds18b20Update > 750)
     {
-        sTimerTS_ds18b20Update = HAL_GetTick();
+        sTimerTS_ds18b20Update = nowTick;
         errTime = 5;
         if (DS18B20_Mode)
         {
@@ -163,9 +166,10 @@ void loop(void)
     segSend((seg7Mask[segPos[0]] | segDP[0]), (seg7Mask[segPos[1]] | segDP[1]), (seg7Mask[segPos[2]] | segDP[2]));
 
     // LCD Display
-    if (HAL_GetTick() - sTimerTS_lcdRefresh > 18)
+    nowTick=HAL_GetTick();
+    if (nowTick - sTimerTS_lcdRefresh > 33)
     {
-        sTimerTS_lcdRefresh = HAL_GetTick();
+        sTimerTS_lcdRefresh = nowTick;
 
         printf("\n");
 

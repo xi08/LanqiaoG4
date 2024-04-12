@@ -1,5 +1,4 @@
 #include "i2c.h"
-#include "swDelay.h"
 
 void i2cInit(void)
 {

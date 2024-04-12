@@ -1,5 +1,4 @@
 #include "dht11.h"
-#include "swDelay.h"
 
 uint8_t DHT11_ReadData(float *humi, float *temp)
 {
