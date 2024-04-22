@@ -7,7 +7,10 @@
 	"settings": {
 		"files.associations": {
 			"*.h": "c",
-			"new": "c"
+			"*.c": "c",
+			"*.ino": "cpp",
+			"new": "c",
+			"iostream": "cpp"
 		}
 	}
 }

@@ -11,6 +11,8 @@
 #include "tim.h"
 #include "usart.h"
 
+#include <iostream>
+
 typedef enum
 {
     sMode_M4,
@@ -52,6 +54,7 @@ float r37Val, r38Val, mcpVal, akyVal, traVal;
 
 uint8_t segPos[3], segDP[3], segCP;
 
+
 void setup(void)
 {
     // Boot time check
@@ -71,11 +74,23 @@ void setup(void)
     segSend(seg7Mask[bootTime / 100], seg7Mask[(bootTime / 10) % 10], seg7Mask[bootTime % 10]);
 
     // Display boot info.
+    //printf("\n\n",dispBuffer);
+    std::cout<<"\n\n";
+  
     sprintf(dispBuffer, "CT117E-M4  Boot=%u", bootTime);
     lcdDisplayString(Line0, dispBuffer);
-    lcdDisplayString(Line1, "Compiled in");
+    //printf("%s\n",dispBuffer);
+    std::cout<<dispBuffer<<'\n';
+
+    sprintf(dispBuffer, "Compiled in");
+    lcdDisplayString(Line1, dispBuffer);
+    //printf("%s\n",dispBuffer);
+    std::cout<<dispBuffer<<'\n';
+    
     sprintf(dispBuffer, "%s,%s", __TIME__, __DATE__);
     lcdDisplayString(Line2, dispBuffer);
+    //printf("%s\n",dispBuffer);
+    std::cout<<dispBuffer<<'\n';
 
     HAL_Delay(1500);
 
@@ -117,7 +132,7 @@ void loop(void)
     MCP_CFGVal = mcpRead();
 #ifdef CT117EXA
     // DHT11 Read
-    nowTick=HAL_GetTick();
+    nowTick = HAL_GetTick();
     if (nowTick - sTimerTS_dht11Refresh > 2000)
     {
         sTimerTS_dht11Refresh = nowTick;
@@ -129,7 +144,7 @@ void loop(void)
     }
 
     // DS18B20 Read
-    nowTick=HAL_GetTick();
+    nowTick = HAL_GetTick();
     if (nowTick - sTimerTS_ds18b20Update > 750)
     {
         sTimerTS_ds18b20Update = nowTick;
@@ -166,8 +181,8 @@ void loop(void)
     segSend((seg7Mask[segPos[0]] | segDP[0]), (seg7Mask[segPos[1]] | segDP[1]), (seg7Mask[segPos[2]] | segDP[2]));
 
     // LCD Display
-    nowTick=HAL_GetTick();
-    if (nowTick - sTimerTS_lcdRefresh > 33)
+    nowTick = HAL_GetTick();
+    if (nowTick - sTimerTS_lcdRefresh > 100)
     {
         sTimerTS_lcdRefresh = nowTick;
 

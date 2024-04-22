@@ -1,6 +1,10 @@
 #ifndef __LDRV_H
 #define __LDRV_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "main.h"
 
 typedef enum
@@ -35,5 +39,10 @@ void lcdClearLine(uint16_t Line);
 
 void lcdDisplayString(uint16_t Line, char *str);
 void lcdDisplayChar(uint16_t Xpos, uint16_t Ypos, char ch);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif // !LDRV_H
